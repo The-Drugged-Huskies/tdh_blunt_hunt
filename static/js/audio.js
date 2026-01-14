@@ -592,16 +592,16 @@ class AudioManager {
         const velocity = 0.9 + Math.random() * 0.2; // Minor variation for consistency
         const osc = this.ctx.createOscillator();
         osc.type = 'sawtooth';
-        osc.frequency.value = freq;
+        osc.frequency.value = freq; // Back to original pitch (not sub-bass)
 
         const filter = this.ctx.createBiquadFilter();
         filter.type = 'lowpass';
         filter.Q.value = 2;
 
         // Deeper Filter Envelope
-        filter.frequency.setValueAtTime(80, time); // Start lower
-        filter.frequency.exponentialRampToValueAtTime(400 * velocity, time + 0.02); // Velocity affects brightness
-        filter.frequency.exponentialRampToValueAtTime(100, time + 0.2); // Settle lower (was 150)
+        filter.frequency.setValueAtTime(60, time); // Start
+        filter.frequency.exponentialRampToValueAtTime(300 * velocity, time + 0.02); // Peak at 300Hz (was 400, then 220) - Tames the "high notes" buzz
+        filter.frequency.exponentialRampToValueAtTime(80, time + 0.2); // Settle
 
         const gain = this.ctx.createGain();
         gain.gain.setValueAtTime(0, time);
