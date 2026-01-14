@@ -1,46 +1,93 @@
-<!DOCTYPE html>
-<html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Blunt Hunt - Dogechain Edition</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js" type="application/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"
+        type="application/javascript"></script>
 </head>
 
 <body>
-    <div id="game-container">
-        <canvas id="gameCanvas"></canvas>
-        <div id="ui-layer">
-            <div class="status-bar">
-                <div id="score-board">
-                    <span>SCORE: <span id="score">0</span></span>
-                    <span>TIME: <span id="timer">00:00</span></span>
+    <div id="nes-wrapper">
+        <div id="game-container">
+            <!-- Top Header (Leaderboard & Wallet) -->
+            <div id="nes-header">
+                <div id="header-left">
+                    <button id="leaderboard-btn" class="btn-secondary header-btn">LEADERBOARD</button>
+                    <div id="timer-display" class="hidden">TIME: 60</div>
                 </div>
                 <div id="wallet-container">
-                    <button id="connect-wallet" class="btn-wallet">Connect Wallet</button>
-                    <div id="balance-display" class="hidden">
-                        <span id="doge-balance">0.00</span> DOGE
+                    <button id="connect-wallet-btn" class="btn-wallet">CONNECT</button>
+                    <!-- Popup Menu -->
+                    <div id="wallet-popup" class="hidden">
+                        <div id="popup-balance">0.00 DOGE</div>
+                        <button id="disconnect-btn" class="btn-secondary">DISCONNECT</button>
                     </div>
                 </div>
             </div>
-            <div id="start-screen" class="overlay">
-                <h1 class="title">BLUNT HUNT</h1>
-                <p class="subtitle">DOGECHAIN EDITION</p>
-                <button id="start-btn" class="btn-primary">Start Hunt</button>
+
+            <!-- Background Layer -->
+            <div id="game-background"></div>
+
+            <!-- Canvas sits on top of everything now -->
+            <canvas id="gameCanvas"></canvas>
+
+            <div id="ui-layer">
+                <div id="start-screen" class="overlay">
+                    <h1 class="title">BLUNT HUNT</h1>
+                    <p class="subtitle">DOGECHAIN EDITION</p>
+
+                    <!-- Wallet Connect Flow -->
+                    <button id="start-connect-btn" class="btn-primary">CONNECT WALLET</button>
+                    <button id="start-btn" class="btn-primary hidden">START GAME</button>
+                    <!-- Leaderboard btn moved to header -->
+                </div>
+
+                <div id="leaderboard-screen" class="overlay hidden">
+                    <h1 class="title" style="font-size: 2rem;">TOP 10</h1>
+                    <div id="leaderboard-list">
+                        <!-- JS Populates this -->
+                        <div class="leaderboard-header">
+                            <span>RANK</span><span>NAME</span><span>SCORE</span>
+                        </div>
+                        <div id="leaderboard-rows"></div>
+                    </div>
+                    <button id="close-leaderboard-btn" class="btn-secondary">CLOSE</button>
+                </div>
+
+                <div id="game-over-screen" class="overlay hidden">
+                    <h1 class="title">GAME OVER</h1>
+                    <p class="subtitle">SCORE: <span id="final-score">0</span></p>
+                    <button id="restart-btn" class="btn-primary">TRY AGAIN</button>
+                </div>
             </div>
-            <div id="game-over-screen" class="overlay hidden">
-                <h1 class="title">GAME OVER</h1>
-                <p class="subtitle">Final Score: <span id="final-score">0</span></p>
-                <button id="restart-btn" class="btn-primary">Play Again</button>
+
+            <!-- NES Style Bottom HUD -->
+            <div id="nes-hud" class="hidden">
+                <div class="hud-section left">
+                    <div class="hud-label">SCORE</div>
+                    <div id="score">000000</div>
+                </div>
+                <div class="hud-section center">
+                    <div class="hit-row">
+                        <div class="hud-label">HIT</div>
+                        <div id="hit-markers">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+                </div>
+                <div class="hud-section right">
+                    <div class="hud-label">ROUND</div>
+                    <div id="round-display">R=1</div>
+                </div>
             </div>
-            <div id="footer">
-                Blunt Hunt &copy; 2026 - Dogechain Edition
-            </div>
+        </div>
+
+        <div id="footer">
+            Blunt Hunt &copy; 2026 - Dogechain Edition
         </div>
     </div>
 

@@ -1,11 +1,13 @@
 :root {
-    --bg-color: #0b0b0b;
-    --accent-color: #00ff9d;
-    /* Neon Green */
-    --accent-secondary: #bd00ff;
-    /* Neon Purple */
-    --text-color: #ffffff;
-    --font-main: 'Inter', sans-serif;
+    --bg-color: #111;
+    --nes-black: #000;
+    --nes-green: #83d313;
+    /* Duck Hunt Grass Greenish */
+    --nes-sky: #64b9fc;
+    --nes-text: #ffffff;
+    --nes-accent: #ff0000;
+    /* Hit marker red */
+    --font-nes: 'Press Start 2P', cursive;
 }
 
 * {
@@ -16,197 +18,419 @@
 
 body {
     background-color: var(--bg-color);
-    color: var(--text-color);
-    font-family: var(--font-main);
-    overflow: hidden;
+    color: var(--nes-text);
+    font-family: var(--font-nes);
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
+    overflow: hidden;
+}
+
+#nes-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
 }
 
 #game-container {
     position: relative;
+    /* Strict 4:3 Aspect Ratio */
+    aspect-ratio: 4/3;
+    height: 85vh;
+    /* Fit within screen */
+    max-width: 95vw;
+    background: #000;
+    border: 4px solid #333;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+#game-background {
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at center, #1a1a1a 0%, #000000 100%);
-    overflow: hidden;
+    z-index: 1;
+    background-size: cover;
+    background-position: bottom center;
+    background-repeat: no-repeat;
+    background-color: var(--nes-sky);
+    /* Fallback */
+    image-rendering: pixelated;
 }
 
 canvas {
     display: block;
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
     height: 100%;
-    touch-action: none;
-    /* Prevent default touch actions like scrolling */
+    z-index: 10;
+    /* Above HUD */
+    pointer-events: auto;
+    /* Ensure clicks pass to canvas or are handled if needed */
+    background: transparent;
+    /* Transparent so we see bg and HUD if needed */
+    image-rendering: pixelated;
 }
 
+/* UI Layer overrides */
 #ui-layer {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+    /* Covers everything including HUD for overlays */
     pointer-events: none;
-    /* Let clicks pass through to canvas */
-    display: flex;
-    flex-direction: column;
 }
 
-/* Status Bar Container */
-.status-bar {
+/* NES HUD */
+#nes-hud {
+    position: absolute;
+    bottom: 0;
+    left: 0;
     width: 100%;
-    height: 50px;
-    background: rgba(0, 0, 0, 0.8);
-    border-bottom: 2px solid var(--accent-color);
-    backdrop-filter: blur(10px);
+    height: 60px;
+    /* Fixed height for HUD */
+    background-color: var(--nes-black);
+    border-top: 4px solid var(--nes-green);
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0 20px;
-    pointer-events: auto;
-    /* Allow clicks on buttons in standard bar */
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
-    z-index: 10;
+    font-size: 0.9rem;
+    color: var(--nes-green);
+    z-index: 5;
+    /* Below Canvas, Above Background */
 }
 
-#score-board {
-    /* Reset absolute positioning */
-    position: static;
-    font-size: 1.2rem;
-    font-weight: 900;
-    text-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
+.hud-section {
     display: flex;
-    gap: 40px;
-    pointer-events: none;
+    flex-direction: column;
+    justify-content: center;
 }
 
-#wallet-container {
-    /* Reset absolute positioning */
-    position: static;
+.hud-section.right {
+    align-items: flex-end;
+    text-align: right;
+}
+
+.hud-label {
+    background-color: #fc9838;
+    /* That classic orange/tan label bg */
+    color: #000;
+    padding: 2px 4px;
+    margin-bottom: 4px;
+    font-size: 0.7rem;
+    display: inline-block;
+    border-radius: 2px;
+}
+
+.hit-row {
     display: flex;
     align-items: center;
-    gap: 15px;
-    z-index: 100;
-    pointer-events: all;
+    gap: 10px;
 }
 
-#balance-display {
-    font-weight: 700;
-    color: var(--accent-color);
-    text-shadow: 0 0 5px rgba(0, 255, 157, 0.5);
-    font-size: 1rem;
+#hit-markers {
+    display: flex;
+    gap: 5px;
 }
 
-#balance-display.hidden {
-    display: none;
+.hit-marker {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background-color: #fff;
+    opacity: 0.3;
 }
 
-.btn-wallet {
-    padding: 5px 15px;
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--text-color);
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid var(--accent-color);
-    border-radius: 30px;
-    cursor: pointer;
-    backdrop-filter: blur(5px);
-    transition: all 0.3s ease;
+.hit-marker.active {
+    opacity: 1;
+    background-color: var(--nes-accent);
 }
 
-.btn-wallet:hover {
-    background: var(--accent-color);
-    color: var(--bg-color);
-    box-shadow: 0 0 15px var(--accent-color);
+/* Wallet and Buttons */
+/* Wallet andButtons */
+#wallet-container {
+    /* Grid positioning handled in #nes-header */
+    position: relative;
+    display: flex;
+    align-items: center;
+    font-size: 0.7rem;
+    pointer-events: auto;
 }
 
-.btn-wallet.connected {
-    border-color: var(--accent-secondary);
-    color: var(--accent-secondary);
+/* .btn-wallet is now styled with .header-btn above for uniformity */
+
+#wallet-popup {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 5px;
+    background: #000;
+    border: 2px solid #fff;
+    padding: 10px;
+    min-width: 150px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 50;
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.5);
 }
 
-.btn-wallet.connected:hover {
-    background: var(--accent-secondary);
-    color: var(--text-color);
-    box-shadow: 0 0 15px var(--accent-secondary);
+#popup-balance {
+    color: var(--nes-green);
+    text-align: center;
+    border-bottom: 2px solid #333;
+    padding-bottom: 5px;
 }
 
+#disconnect-btn {
+    background: #f00 !important;
+    border-color: #fff !important;
+    font-size: 0.6rem !important;
+    padding: 5px !important;
+    margin: 0 !important;
+}
+
+#disconnect-btn:hover {
+    background: #fff !important;
+    color: #f00 !important;
+}
+
+/* Overlays */
 .overlay {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+    /* Cover whole game area */
     background: rgba(0, 0, 0, 0.85);
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    pointer-events: all;
-    /* Re-enable clicks for buttons */
-    transition: opacity 0.3s ease;
+    pointer-events: auto;
+    text-align: center;
+    z-index: 100;
 }
 
 .overlay.hidden {
-    opacity: 0;
-    pointer-events: none;
+    display: none;
 }
 
 .title {
-    font-size: 5rem;
-    font-weight: 900;
-    background: linear-gradient(45deg, var(--accent-color), var(--accent-secondary));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    text-shadow: 0 0 30px rgba(189, 0, 255, 0.3);
-    margin-bottom: 1rem;
-    letter-spacing: -2px;
+    font-size: 2.5rem;
+    color: #ffd700;
+    text-shadow: 4px 4px #c25f00;
+    margin-bottom: 20px;
+    line-height: 1.2;
 }
 
 .subtitle {
-    font-size: 1.2rem;
-    color: #cccccc;
-    margin-bottom: 3rem;
-    font-weight: 400;
+    font-size: 0.9rem;
+    color: #fff;
+    margin-bottom: 30px;
 }
 
 .btn-primary {
-    padding: 15px 40px;
-    font-size: 1.2rem;
-    font-weight: 700;
-    color: var(--bg-color);
-    background: var(--accent-color);
-    border: none;
-    border-radius: 50px;
+    background: #83d313;
+    /* NES Green */
+    border: 4px solid #fff;
+    color: #000;
+    padding: 15px 30px;
+    font-family: inherit;
+    font-size: 1rem;
     cursor: pointer;
-    transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.2s ease;
-    box-shadow: 0 0 20px rgba(0, 255, 157, 0.4);
     text-transform: uppercase;
-    letter-spacing: 1px;
 }
 
 .btn-primary:hover {
-    transform: scale(1.05);
-    box-shadow: 0 0 30px rgba(0, 255, 157, 0.6);
     background: #fff;
+    color: #000;
+    border-color: #83d313;
 }
 
-.btn-primary:active {
-    transform: scale(0.95);
+.btn-secondary {
+    background: #000;
+    border: 4px solid #fff;
+    color: #fff;
+    padding: 10px 20px;
+    font-family: inherit;
+    font-size: 0.8rem;
+    cursor: pointer;
+    text-transform: uppercase;
+    margin-top: 10px;
+}
+
+.btn-secondary:hover {
+    background: #fff;
+    color: #000;
+}
+
+/* Leaderboard */
+#leaderboard-list {
+    width: 80%;
+    margin-bottom: 20px;
+    border: 4px solid #fff;
+    padding: 10px;
+    background: #000;
+}
+
+/* Leaderboard Layout */
+.leaderboard-header,
+.leaderboard-row {
+    display: grid;
+    grid-template-columns: 60px 1fr 80px;
+    /* Rank, Name, Score */
+    gap: 10px;
+    align-items: center;
+    border-bottom: 2px solid #333;
+    /* Use consistent internal borders */
+    padding: 5px 0;
+}
+
+.leaderboard-header {
+    border-bottom: 2px solid #fff;
+    margin-bottom: 10px;
+    color: var(--nes-green);
+    text-transform: uppercase;
+    font-size: 0.8rem;
+}
+
+.leaderboard-row {
+    font-size: 0.8rem;
+    border-bottom: 1px dashed #333;
+}
+
+.leaderboard-row:last-child {
+    border-bottom: none;
+}
+
+.leaderboard-row span,
+.leaderboard-header span {
+    text-align: center;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+/* Specific alignments */
+.leaderboard-row span:nth-child(1),
+.leaderboard-header span:nth-child(1) {
+    text-align: left;
+    padding-left: 10px;
+}
+
+.leaderboard-row span:nth-child(2),
+.leaderboard-header span:nth-child(2) {
+    text-align: center;
+}
+
+.leaderboard-row span:nth-child(3),
+.leaderboard-header span:nth-child(3) {
+    text-align: right;
+    padding-right: 10px;
 }
 
 #footer {
-    position: absolute;
-    bottom: 0;
+    margin-top: 10px;
+    color: #555;
+    font-size: 0.6rem;
+    text-align: center;
+}
+
+/* NES Header */
+#nes-header {
     width: 100%;
-    height: 30px;
-    background: rgba(0, 0, 0, 0.7);
+    height: 40px;
+    background-color: var(--nes-black);
+    border-bottom: 2px solid #555;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    /* Left, Right */
+    align-items: center;
+    padding: 0 10px;
+    z-index: 200;
+}
+
+#header-left {
+    justify-self: start;
+    display: flex;
+    align-items: center;
+}
+
+/* Common Header Button Style */
+.header-btn,
+.btn-wallet {
+    background: #000;
+    border: 2px solid #fff;
+    color: #fff;
+    padding: 0;
+    height: 28px;
+    width: 140px;
+    /* Fixed width */
+    font-family: inherit;
+    font-size: 0.65rem;
+    cursor: pointer;
+    text-transform: uppercase;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 0.8rem;
-    color: #888;
-    z-index: 5;
+    margin: 0;
+}
+
+.header-btn:hover,
+.btn-wallet:hover {
+    background: #fff;
+    color: #000;
+}
+
+/* Ensure Leaderboard stays left */
+#leaderboard-btn {
+    justify-self: start;
+}
+
+/* Ensure Wallet stays right */
+#wallet-container {
+    justify-self: end;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+/* UI Layer overrides */
+#ui-layer {
+    position: absolute;
+    top: 40px;
+    /* Below Header */
+    left: 0;
+    width: 100%;
+    height: calc(100% - 100px);
+    /* Subtract Header(40) + HUD(60) */
     pointer-events: none;
+}
+
+/* Timer */
+#timer-display {
+    font-size: 0.9rem;
+    color: var(--nes-green);
+    text-shadow: 1px 1px #000;
+    margin: 0;
+}
+
+/* Utility */
+.hidden {
+    display: none !important;
 }

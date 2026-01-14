@@ -12,7 +12,16 @@ const DOGECHAIN_CONFIG = {
 };
 
 const connectBtn = document.getElementById('connect-wallet-btn');
-const balanceDisplay = document.getElementById('balance-display');
+const startConnectBtn = document.getElementById('start-connect-btn');
+const startBtn = document.getElementById('start-btn');
+const walletPopup = document.getElementById('wallet-popup');
+const popupBalance = document.getElementById('popup-balance');
+const disconnectBtn = document.getElementById('disconnect-btn');
+
+let currentAccount = null;
+
+// Expose for game.js
+window.getCurrentWallet = () => currentAccount;
 
 async function connectWallet() {
     if (typeof window.ethereum === 'undefined') {
@@ -24,17 +33,19 @@ async function connectWallet() {
         const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
         const account = accounts[0];
 
-        // Check Network
         const chainId = await window.ethereum.request({ method: 'eth_chainId' });
 
         if (chainId !== DOGECHAIN_ID) {
             await switchToDogechain();
         }
 
+        currentAccount = account;
         updateUI(account);
 
-        // Listen for changes
-        window.ethereum.on('accountsChanged', (accounts) => updateUI(accounts[0]));
+        window.ethereum.on('accountsChanged', (accounts) => {
+            currentAccount = accounts[0] || null;
+            updateUI(currentAccount);
+        });
         window.ethereum.on('chainChanged', () => window.location.reload());
 
     } catch (error) {
@@ -67,26 +78,42 @@ async function switchToDogechain() {
 
 function updateUI(account) {
     if (account) {
-        connectBtn.innerText = `${account.substring(0, 6)}...${account.substring(account.length - 4)}`;
+        // Connected
+        const shortAddr = `${account.substring(0, 4)}..${account.substring(account.length - 4)}`;
+        connectBtn.innerText = shortAddr;
         connectBtn.classList.add('connected');
-        balanceDisplay.classList.remove('hidden');
-        fetchBalance(account); // Trigger balance fetch
+
+        // Start Screen Logic
+        if (startConnectBtn) startConnectBtn.classList.add('hidden');
+        if (startBtn) startBtn.classList.remove('hidden');
+
+        fetchBalance(account);
     } else {
-        connectBtn.innerText = 'Connect Wallet';
+        // Disconnected
+        connectBtn.innerText = 'CONNECT';
         connectBtn.classList.remove('connected');
-        balanceDisplay.classList.add('hidden');
-        balanceDisplay.innerText = '0.0000 DOGE';
+        if (walletPopup) walletPopup.classList.add('hidden'); // Ensure popup is closed
+
+        // Start Screen Logic
+        if (startConnectBtn) startConnectBtn.classList.remove('hidden');
+        if (startBtn) startBtn.classList.add('hidden');
     }
 }
 
-/**
- * fetchBalance
- * Fetches the native DOGE balance for the connected account.
- * Uses a dedicated JSON-RPC provider (Dogechain Official) to ensure accuracy
- * and independence from the user's injected wallet state.
- * 
- * @param {string} account - The wallet address to fetch balance for.
- */
+function disconnectWallet() {
+    currentAccount = null;
+    updateUI(null);
+    console.log("Disconnected (UI State Reset)");
+}
+
+function togglePopup() {
+    if (currentAccount) {
+        if (walletPopup) walletPopup.classList.toggle('hidden');
+    } else {
+        connectWallet();
+    }
+}
+
 async function fetchBalance(account) {
     try {
         // Use the official Dogechain RPC for reliable data
@@ -99,28 +126,55 @@ async function fetchBalance(account) {
         const balance = await provider.getBalance(account);
         const formattedBalance = ethers.utils.formatEther(balance);
 
-        // Update UI with 4 decimal precision
-        balanceDisplay.innerText = `${parseFloat(formattedBalance).toFixed(4)} DOGE`;
-        balanceDisplay.classList.remove('hidden');
+        if (popupBalance) popupBalance.innerText = `${parseFloat(formattedBalance).toFixed(2)} DOGE`;
     } catch (error) {
         console.error('Error fetching balance:', error);
-        balanceDisplay.innerText = 'Error';
+        if (popupBalance) popupBalance.innerText = 'Error';
     }
 }
 
-connectBtn.addEventListener('click', connectWallet);
+function initWallet() {
+    console.log("Initializing Wallet...");
+    if (connectBtn) {
+        connectBtn.addEventListener('click', (e) => {
+            e.stopPropagation(); // Prevent immediate close
+            togglePopup();
+        });
+    }
+    if (startConnectBtn) {
+        startConnectBtn.addEventListener('click', () => connectWallet());
+    }
+    if (disconnectBtn) {
+        disconnectBtn.addEventListener('click', () => disconnectWallet());
+    }
+
+    // Close popup when clicking outside
+    document.addEventListener('click', (e) => {
+        if (walletPopup && !walletPopup.contains(e.target) && e.target !== connectBtn) {
+            walletPopup.classList.add('hidden');
+        }
+    });
+}
 
 // Check if already connected on load
 async function checkConnection() {
     if (typeof window.ethereum !== 'undefined') {
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-        if (accounts.length > 0) {
-            const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-            if (chainId === DOGECHAIN_ID) {
-                updateUI(accounts[0]);
+        try {
+            const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+            if (accounts.length > 0) {
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                // Note: chainId returns hex string
+                if (chainId === DOGECHAIN_ID) {
+                    updateUI(accounts[0]);
+                }
             }
+        } catch (err) {
+            console.error("Connection Check Failed:", err);
         }
     }
 }
 
-window.addEventListener('load', checkConnection);
+window.addEventListener('DOMContentLoaded', () => {
+    initWallet();
+    checkConnection();
+});
