@@ -313,41 +313,50 @@ class Game {
 
             // Collision Detection
             if (this.husky && this.checkCollision(this.husky, blunt)) {
-                this.blunts.splice(i, 1);
 
-                // Track Hit for Combo
-                this.shotHit = true;
-                this.combo++;
-                // Simple multiplier logic: Every 2 hits increases tier (1x -> 2x -> 4x -> 8x)
-                // limit to 8x
-                this.multiplier = Math.min(8, Math.pow(2, Math.floor(this.combo / 2)));
-                if (this.combo < 1) this.multiplier = 1;
+                const result = blunt.hit();
 
-                // Score based on Round
-                const points = this.round * 10 * this.multiplier;
-                this.updateScore(points);
+                if (!result.destroyed) {
+                    // Armored Clink - Bounce husky
+                    this.husky.dx *= -0.8;
+                    this.husky.dy *= -0.8;
+                    this.particles.spawnFloatingText(blunt.x, blunt.y, "CLINK!", '#aaa');
+                    this.particles.spawnExplosion(blunt.x, blunt.y, '#ccc');
+                } else {
+                    this.blunts.splice(i, 1);
 
-                // Trigger Visuals
-                this.particles.spawnExplosion(blunt.x, blunt.y);
+                    // Track Hit for Combo
+                    this.shotHit = true;
+                    this.combo++;
+                    // Simple multiplier logic: Every 2 hits increases tier (1x -> 2x -> 4x -> 8x)
+                    // limit to 8x
+                    this.multiplier = Math.min(8, Math.pow(2, Math.floor(this.combo / 2)));
+                    if (this.combo < 1) this.multiplier = 1;
 
-                let text = `+${points}`;
-                if (this.multiplier > 1) {
-                    text += ` (x${this.multiplier}!)`;
-                }
-                this.particles.spawnFloatingText(blunt.x, blunt.y, text);
-                this.triggerShake(10); // Shake for 10 frames
+                    // Score based on Blunt Value
+                    const points = result.score * this.multiplier;
+                    this.updateScore(points);
 
-                // Round Progression
+                    // Trigger Visuals
+                    this.particles.spawnExplosion(blunt.x, blunt.y, blunt.type === 'gold' ? '#FFD700' : '#8b4513');
 
-                // Round Progression
-                this.hitsInRound++;
+                    let text = `+${points}`;
+                    if (this.multiplier > 1) {
+                        text += ` (x${this.multiplier}!)`;
+                    }
+                    this.particles.spawnFloatingText(blunt.x, blunt.y, text, blunt.type === 'gold' ? '#FFD700' : '#fff');
+                    this.triggerShake(10); // Shake for 10 frames
 
-                // Update hit markers visually
-                this.hits = this.hitsInRound;
-                this.updateHitMarkers();
+                    // Round Progression
+                    this.hitsInRound++;
 
-                if (this.hitsInRound >= 10) {
-                    this.advanceRound();
+                    // Update hit markers visually
+                    this.hits = this.hitsInRound;
+                    this.updateHitMarkers();
+
+                    if (this.hitsInRound >= 10) {
+                        this.advanceRound();
+                    }
                 }
 
                 continue;
@@ -651,10 +660,39 @@ class Blunt {
 
         // Speed increases with multiplier
         this.speed = (Math.random() * 2 + 1) * speedMultiplier;
+
+        // Special Types
+        const rand = Math.random();
+        this.type = 'normal';
+        this.basePoints = 10;
+        this.hp = 1;
+        this.color = null; // Default use sprite
+
+        if (rand < 0.1) { // 10% Golden
+            this.type = 'gold';
+            this.speed *= 1.5;
+            this.basePoints = 50;
+            this.color = '#FFD700';
+        } else if (rand < 0.25) { // 15% Armored
+            this.type = 'armored';
+            this.speed *= 0.8;
+            this.hp = 2; // Takes 2 hits
+            this.basePoints = 20;
+            this.color = '#A0A0A0';
+        }
+
         // Reduced amplitude to prevent swooping too low
         this.amplitude = Math.random() * 20 + 20;
         this.frequency = Math.random() * 0.005 + 0.002;
         this.direction = Math.random() > 0.5 ? 1 : -1;
+    }
+
+    hit() {
+        this.hp--;
+        return {
+            destroyed: this.hp <= 0,
+            score: this.basePoints
+        };
     }
 
     isExpired(timestamp) {
@@ -692,6 +730,26 @@ class Blunt {
         ctx.globalAlpha = Math.max(0, alpha);
 
         this.sprite.draw(ctx, this.x, this.y, 60, 60, 0); // Slight larger
+
+        // Overlay for special types
+        if (this.type === 'gold') {
+            ctx.globalCompositeOperation = 'source-atop'; // Tint? or just draw circle
+            ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 30, 0, Math.PI * 2);
+            ctx.fill();
+            // Sparkle effect?
+            if (Math.random() < 0.2) {
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(this.x + (Math.random() - 0.5) * 40, this.y + (Math.random() - 0.5) * 40, 4, 4);
+            }
+        } else if (this.type === 'armored') {
+            ctx.fillStyle = 'rgba(100, 100, 100, 0.4)';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, 30, 0, Math.PI * 2);
+            ctx.fill();
+            // Draw HP indicator if damaged?
+        }
 
         ctx.restore();
     }
