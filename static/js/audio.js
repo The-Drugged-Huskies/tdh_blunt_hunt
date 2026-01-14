@@ -489,7 +489,7 @@ class AudioManager {
         osc2.frequency.value = freq * 1.005; // Slight detune for thickness without wobble
 
         const gain = this.ctx.createGain();
-        gain.gain.setValueAtTime(0.20, time); // Boosted as Tri/Sine have less perceived volume
+        gain.gain.setValueAtTime(0.15, time); // Boosted as Tri/Sine have less perceived volume
         gain.gain.exponentialRampToValueAtTime(0.01, time + length);
 
         const filter = this.ctx.createBiquadFilter();

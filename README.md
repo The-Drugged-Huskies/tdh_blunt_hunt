@@ -43,7 +43,9 @@
 - [x] **Special Blunts**:
     - **Gold**: Fast & high reward.
     - **Armored**: Bounces shots, takes 2 hits.
-- [x] **Audio**: Procedural sound effects for shooting, hitting, and collisions.
-
+- [x] **Audio**: 
+    - Procedural sound effects for shooting, hitting, and collisions.
+    - **Dynamic Music Engine**: Generates a small variation every run.
+ 
 ---
 *Built with ❤️ for the Dogechain Community.*
