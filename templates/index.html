@@ -1,3 +1,6 @@
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -43,7 +46,25 @@
                     <!-- Wallet Connect Flow -->
                     <button id="start-connect-btn" class="btn-primary">CONNECT WALLET</button>
                     <button id="start-btn" class="btn-primary hidden">START GAME</button>
-                    <!-- Leaderboard btn moved to header -->
+
+                    <button id="settings-btn" class="btn-secondary">SETTINGS</button>
+
+                    <div id="settings-popup" class="settings-popup hidden">
+                        <div class="settings-title">AUDIO SETTINGS</div>
+                        <div class="settings-row">
+                            <span>MUSIC</span>
+                            <div class="slide-container">
+                                <input type="range" min="0" max="100" value="100" class="slider" id="music-volume">
+                            </div>
+                        </div>
+                        <div class="settings-row">
+                            <span>EFFECTS</span>
+                            <div class="slide-container">
+                                <input type="range" min="0" max="100" value="100" class="slider" id="sfx-volume">
+                            </div>
+                        </div>
+                        <button id="close-settings-btn" class="btn-secondary small">CLOSE</button>
+                    </div>
                 </div>
 
                 <div id="leaderboard-screen" class="overlay hidden">

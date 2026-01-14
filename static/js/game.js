@@ -98,6 +98,66 @@ class Game {
 
         if (this.leaderboardBtn) this.leaderboardBtn.addEventListener('click', () => this.showLeaderboard());
         if (this.closeLeaderboardBtn) this.closeLeaderboardBtn.addEventListener('click', () => this.hideLeaderboard());
+
+        // Settings Logic
+        this.settingsBtn = document.getElementById('settings-btn');
+        this.settingsPopup = document.getElementById('settings-popup');
+        this.closeSettingsBtn = document.getElementById('close-settings-btn');
+        this.musicSlider = document.getElementById('music-volume');
+        this.sfxSlider = document.getElementById('sfx-volume');
+
+        if (this.settingsBtn) {
+            this.settingsBtn.addEventListener('click', () => {
+                this.settingsPopup.classList.remove('hidden');
+                this.settingsBtn.classList.add('hidden'); // Hide self
+
+                // Hide Start/Connect buttons
+                const startConnectBtn = document.getElementById('start-connect-btn');
+                if (startConnectBtn) startConnectBtn.classList.add('hidden');
+                if (this.startBtn) this.startBtn.classList.add('hidden');
+
+                // Hide Title/Subtitle
+                const title = document.querySelector('#start-screen .title');
+                const subtitle = document.querySelector('#start-screen .subtitle');
+                if (title) title.classList.add('hidden');
+                if (subtitle) subtitle.classList.add('hidden');
+            });
+        }
+        if (this.closeSettingsBtn) {
+            this.closeSettingsBtn.addEventListener('click', () => {
+                this.settingsPopup.classList.add('hidden');
+                this.settingsBtn.classList.remove('hidden'); // Show self
+
+                // Restore Title/Subtitle
+                const title = document.querySelector('#start-screen .title');
+                const subtitle = document.querySelector('#start-screen .subtitle');
+                if (title) title.classList.remove('hidden');
+                if (subtitle) subtitle.classList.remove('hidden');
+
+                // Restore Start/Connect based on wallet state
+                const account = window.getCurrentWallet ? window.getCurrentWallet() : null;
+                if (account) {
+                    if (this.startBtn) this.startBtn.classList.remove('hidden');
+                } else {
+                    const startConnectBtn = document.getElementById('start-connect-btn');
+                    if (startConnectBtn) startConnectBtn.classList.remove('hidden');
+                }
+            });
+        }
+
+        if (this.musicSlider) {
+            this.musicSlider.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value);
+                this.audio.setMusicVolume(val);
+            });
+        }
+
+        if (this.sfxSlider) {
+            this.sfxSlider.addEventListener('input', (e) => {
+                const val = parseInt(e.target.value);
+                this.audio.setSfxVolume(val);
+            });
+        }
     }
 
 
@@ -117,6 +177,7 @@ class Game {
     }
 
     start() {
+        if (this.isRunning) return;
         document.getElementById('start-screen').classList.add('hidden');
         document.getElementById('game-over-screen').classList.add('hidden');
         document.getElementById('nes-hud').classList.remove('hidden');
@@ -662,14 +723,12 @@ class Husky {
         this.sprite = new Sprite({
             image: this.game.assets['husky']
         });
-        // this.sprite.setAnimation('fly');
     }
 
     update(timestamp) {
         this.x += this.dx;
         this.y += this.dy;
         this.dy += this.gravity;
-        // this.dx *= this.friction; 
 
         // Calculate rotation based on velocity
         this.rotation = Math.atan2(this.dy, this.dx);

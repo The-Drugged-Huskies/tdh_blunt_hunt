@@ -6,7 +6,8 @@
 class AudioManager {
     constructor() {
         this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-        this.isMuted = false;
+        this.musicVolume = 1.0;
+        this.sfxVolume = 1.0;
 
         // Resume AudioContext on first interaction
         window.addEventListener('click', () => {
@@ -16,8 +17,20 @@ class AudioManager {
         }, { once: true });
     }
 
+    setMusicVolume(percent) {
+        this.musicVolume = percent / 100;
+        // Apply immediate change if needed (not strictly needed for procedural sequencer unless we have a master bus, 
+        // but note playback will pick it up on next note).
+        // For a more immediate effect, we'd need a master gain node for music.
+        // But per-note check is fine for this style.
+    }
+
+    setSfxVolume(percent) {
+        this.sfxVolume = percent / 100;
+    }
+
     playTone(freq, type, duration, vol = 0.1) {
-        if (this.isMuted || this.ctx.state === 'suspended') return;
+        if (this.sfxVolume <= 0 || this.ctx.state === 'suspended') return;
 
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
@@ -25,7 +38,8 @@ class AudioManager {
         osc.type = type;
         osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
 
-        gain.gain.setValueAtTime(vol, this.ctx.currentTime);
+        const masterVol = vol * this.sfxVolume;
+        gain.gain.setValueAtTime(masterVol, this.ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
 
         osc.connect(gain);
@@ -36,7 +50,7 @@ class AudioManager {
     }
 
     shoot() {
-        if (this.isMuted) return;
+        if (this.sfxVolume <= 0) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
 
@@ -44,7 +58,8 @@ class AudioManager {
         osc.frequency.setValueAtTime(600, this.ctx.currentTime);
         osc.frequency.exponentialRampToValueAtTime(200, this.ctx.currentTime + 0.15);
 
-        gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+        const masterVol = 0.15 * this.sfxVolume;
+        gain.gain.setValueAtTime(masterVol, this.ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
 
         osc.connect(gain);
@@ -59,14 +74,16 @@ class AudioManager {
     }
 
     goldHit() {
-        if (this.isMuted) return;
+        if (this.sfxVolume <= 0) return;
         const now = this.ctx.currentTime;
         const osc1 = this.ctx.createOscillator();
         const gain1 = this.ctx.createGain();
         osc1.type = 'sine';
         osc1.frequency.setValueAtTime(880, now);
         osc1.frequency.exponentialRampToValueAtTime(1760, now + 0.1);
-        gain1.gain.setValueAtTime(0.25, now);
+
+        const masterVol = 0.25 * this.sfxVolume;
+        gain1.gain.setValueAtTime(masterVol, now);
         gain1.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
         osc1.connect(gain1);
         gain1.connect(this.ctx.destination);
@@ -77,7 +94,7 @@ class AudioManager {
         const gain2 = this.ctx.createGain();
         osc2.type = 'sine';
         osc2.frequency.setValueAtTime(1108.73, now);
-        gain2.gain.setValueAtTime(0.25, now);
+        gain2.gain.setValueAtTime(masterVol, now);
         gain2.gain.exponentialRampToValueAtTime(0.01, now + 0.8);
         osc2.connect(gain2);
         gain2.connect(this.ctx.destination);
@@ -86,12 +103,14 @@ class AudioManager {
     }
 
     clink() {
-        if (this.isMuted) return;
+        if (this.sfxVolume <= 0) return;
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.type = 'sine';
         osc.frequency.setValueAtTime(1200, this.ctx.currentTime);
-        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+
+        const masterVol = 0.2 * this.sfxVolume;
+        gain.gain.setValueAtTime(masterVol, this.ctx.currentTime);
         gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
         osc.connect(gain);
         gain.connect(this.ctx.destination);
@@ -127,14 +146,16 @@ class AudioManager {
     }
 
     createDubDelay() {
+        if (this.delayNode) return; // reused?
+
         this.delayNode = this.ctx.createDelay();
-        // Tempo synced delay (3/16th note, dotted eighth)
+        // Tempo synced delay (3/16th note, dotted eighth) - Tempo dependent, update if tempo changes
         const secondsPerBeat = 60 / this.tempo;
         const delayTime = secondsPerBeat * 0.75;
         this.delayNode.delayTime.value = delayTime;
 
         this.feedbackGain = this.ctx.createGain();
-        this.feedbackGain.gain.value = 0.6;
+        this.feedbackGain.gain.value = 0.6; // No master volume on feedback itself, only output
 
         this.delayFilter = this.ctx.createBiquadFilter();
         this.delayFilter.type = 'lowpass';
@@ -143,7 +164,14 @@ class AudioManager {
         this.delayNode.connect(this.feedbackGain);
         this.feedbackGain.connect(this.delayFilter);
         this.delayFilter.connect(this.delayNode);
-        this.delayNode.connect(this.ctx.destination);
+
+        // Connect delay to a gain node controlled by Music Volume? Or SFX? Dub effects are part of music/theme.
+        // Let's call them part of Music.
+        this.delayOutputGain = this.ctx.createGain();
+        this.delayOutputGain.gain.value = 1.0;
+
+        this.delayNode.connect(this.delayOutputGain);
+        this.delayOutputGain.connect(this.ctx.destination);
     }
 
     generateComposition() {
@@ -397,7 +425,9 @@ class AudioManager {
         const gain = this.ctx.createGain();
         osc.frequency.setValueAtTime(150, time);
         osc.frequency.exponentialRampToValueAtTime(0.01, time + 0.5);
-        gain.gain.setValueAtTime(0.8, time);
+
+        const masterVol = 0.8 * this.musicVolume;
+        gain.gain.setValueAtTime(masterVol, time);
         gain.gain.exponentialRampToValueAtTime(0.01, time + 0.5);
         osc.connect(gain);
         gain.connect(this.ctx.destination);
@@ -416,7 +446,8 @@ class AudioManager {
         filter.type = 'highpass';
         filter.frequency.value = filterFreq;
         const gain = this.ctx.createGain();
-        gain.gain.value = 0.15;
+        const masterVol = 0.15 * this.musicVolume;
+        gain.gain.value = masterVol;
         noise.connect(filter);
         filter.connect(gain);
         gain.connect(this.ctx.destination);
@@ -439,8 +470,13 @@ class AudioManager {
 
         const gain = this.ctx.createGain();
         gain.gain.setValueAtTime(0, time);
-        gain.gain.linearRampToValueAtTime(0.5, time + 0.02); // Quieter attack (was 0.7)
-        gain.gain.linearRampToValueAtTime(0.35, time + 0.1);  // Quieter sustain (was 0.5)
+
+        // Scale gain envelope points by musicVolume
+        const attackVal = 0.5 * this.musicVolume;
+        const sustainVal = 0.35 * this.musicVolume;
+
+        gain.gain.linearRampToValueAtTime(attackVal, time + 0.02); // Quieter attack (was 0.7)
+        gain.gain.linearRampToValueAtTime(sustainVal, time + 0.1);  // Quieter sustain (was 0.5)
         gain.gain.linearRampToValueAtTime(0.01, time + length);
 
         osc.connect(filter);
@@ -467,7 +503,8 @@ class AudioManager {
             const gain = this.ctx.createGain();
             osc.frequency.value = freq;
 
-            gain.gain.setValueAtTime(0.19, time);
+            const masterVol = 0.19 * this.musicVolume;
+            gain.gain.setValueAtTime(masterVol, time);
             gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
 
             osc.connect(filter);
@@ -489,7 +526,8 @@ class AudioManager {
         osc2.frequency.value = freq * 1.005; // Slight detune for thickness without wobble
 
         const gain = this.ctx.createGain();
-        gain.gain.setValueAtTime(0.0505, time); // Boosted as Tri/Sine have less perceived volume
+        const masterVol = 0.0505 * this.musicVolume;
+        gain.gain.setValueAtTime(masterVol, time); // Boosted as Tri/Sine have less perceived volume
         gain.gain.exponentialRampToValueAtTime(0.00005, time + length);
 
         const filter = this.ctx.createBiquadFilter();
@@ -530,8 +568,12 @@ class AudioManager {
             osc.type = 'square';
             osc.frequency.value = chordRoot * 4;
             const gain = this.ctx.createGain();
-            gain.gain.setValueAtTime(0.0066, time);
-            gain.gain.exponentialRampToValueAtTime(0.0075, time + 0.15);
+
+            const masterVol = 0.0066 * this.musicVolume;
+            const rampVol = 0.0075 * this.musicVolume;
+
+            gain.gain.setValueAtTime(masterVol, time);
+            gain.gain.exponentialRampToValueAtTime(rampVol, time + 0.15);
             osc.connect(gain);
             gain.connect(this.delayNode);
             osc.start(time);

@@ -34,9 +34,6 @@ class AssetLoader {
         });
     }
 
-    get(key) {
-        return this.assets[key];
-    }
 }
 
 class Sprite {
