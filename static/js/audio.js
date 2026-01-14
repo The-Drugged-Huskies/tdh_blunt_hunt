@@ -132,7 +132,19 @@ class AudioManager {
         // Randomize Mode: Major (Ring of Fire) or Minor (Dark Roots)
         this.mode = Math.random() > 0.5 ? 'MAJOR' : 'MINOR';
 
-        console.log(`Music Initialized: MOOD=${this.mode}, BPM=${this.tempo}`);
+        // Root Frequency (Fixed to G for now, but calculated relatively below)
+        this.rootFreq = 196.00; // Default G
+        this.currentKey = 'G';
+
+        this.keyFrequencies = {
+            'F': 174.61,
+            'G': 196.00,
+            'Ab': 207.65,
+            'A': 220.00,
+            'Bb': 233.08
+        };
+
+        console.log(`Music Initialized: MOOD=${this.mode}, BPM=${this.tempo}, ROOT=${this.rootFreq}`);
 
         this.lookahead = 25.0;
         this.scheduleAheadTime = 0.1;
@@ -143,6 +155,15 @@ class AudioManager {
 
         this.loopLength = 128; // 8 bars
         this.createDubDelay();
+    }
+
+    setKey(keyName) {
+        if (this.keyFrequencies[keyName]) {
+            this.currentKey = keyName;
+            this.rootFreq = this.keyFrequencies[keyName];
+            console.log(`Key Changed to: ${keyName} (${this.rootFreq}Hz)`);
+            this.generateComposition(); // Regenerate music with new key
+        }
     }
 
     createDubDelay() {
@@ -208,13 +229,14 @@ class AudioManager {
     }
 
     generateSection(type) {
-        // Frequency Constants (Key of G)
-        const G = 196.00;
-        const Bb = 233.08;
-        const C = 261.63;
-        const D = 293.66;
-        const Eb = 311.13;
-        const F = 349.23;
+        const root = this.rootFreq;
+
+        // Relative Intervals (Just Temperament / Harmonic)
+        // These multipliers define the distances from the root note
+        const fourth = root * 1.3348; // IV chord
+        const fifth = root * 1.4983;  // V chord
+        const min6th = root * 1.5874; // bVI chord
+        const min7th = root * 1.7818; // bVII chord
 
         let chords = {};
         let progNames = [];
@@ -222,9 +244,9 @@ class AudioManager {
         if (this.mode === 'MAJOR') {
             // Ring of Fire 
             chords = {
-                'I': { freq: G, isMinor: false },
-                'IV': { freq: C, isMinor: false },
-                'V': { freq: D, isMinor: false }
+                'I': { freq: root, isMinor: false },
+                'IV': { freq: fourth, isMinor: false },
+                'V': { freq: fifth, isMinor: false }
             };
             if (type === 'verse') {
                 progNames = ['I', 'IV', 'I', 'I', 'I', 'IV', 'I', 'I'];
@@ -234,9 +256,9 @@ class AudioManager {
         } else {
             // Dark Roots 
             chords = {
-                'i': { freq: G, isMinor: true },
-                'VI': { freq: Eb, isMinor: false },
-                'VII': { freq: F, isMinor: false }
+                'i': { freq: root, isMinor: true },
+                'VI': { freq: min6th, isMinor: false }, // Flat 6 Major Chord
+                'VII': { freq: min7th, isMinor: false } // Flat 7 Major Chord
             };
             if (type === 'verse') {
                 progNames = ['i', 'VII', 'i', 'VII', 'i', 'VII', 'i', 'i'];

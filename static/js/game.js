@@ -158,6 +158,13 @@ class Game {
                 this.audio.setSfxVolume(val);
             });
         }
+
+        this.keySelect = document.getElementById('key-select');
+        if (this.keySelect) {
+            this.keySelect.addEventListener('change', (e) => {
+                this.audio.setKey(e.target.value);
+            });
+        }
     }
 
 
