@@ -161,6 +161,9 @@ class Game {
 
     gameOver() {
         this.isRunning = false;
+        // Clear canvas to hide game elements
+        this.ctx.clearRect(0, 0, this.width, this.height);
+
         document.getElementById('final-score').innerText = this.score;
         document.getElementById('game-over-screen').classList.remove('hidden');
 
@@ -300,6 +303,7 @@ class Game {
         // this.ctx.strokeRect(0, 0, this.width, this.height - this.hudHeight);
 
         this.updateTimer(timestamp);
+        if (!this.isRunning) return; // Stop drawing if game ended in updateTimer
 
         // Update & Draw Particles (Behind sprites or on top? On top usually)
         this.particles.update();
@@ -342,6 +346,7 @@ class Game {
             if (this.husky && this.checkCollision(this.husky, blunt)) {
 
                 const result = blunt.hit();
+                if (!result.hit) continue; // Cooldown active, ignore collision
 
                 if (!result.destroyed) {
                     // Armored Clink - Bounce husky
@@ -720,11 +725,18 @@ class Blunt {
         this.amplitude = Math.random() * 20 + 20;
         this.frequency = Math.random() * 0.005 + 0.002;
         this.direction = Math.random() > 0.5 ? 1 : -1;
+        this.lastHitTime = 0;
     }
 
     hit() {
+        const now = performance.now();
+        if (now - this.lastHitTime < 400) {
+            return { hit: false };
+        }
+        this.lastHitTime = now;
         this.hp--;
         return {
+            hit: true,
             destroyed: this.hp <= 0,
             score: this.basePoints
         };
