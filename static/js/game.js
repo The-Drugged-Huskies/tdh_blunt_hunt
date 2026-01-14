@@ -41,6 +41,10 @@ class Game {
         this.resize();
         window.addEventListener('resize', () => this.resize());
 
+        // Screen Shake
+        this.gameContainer = document.getElementById('game-container');
+        this.shakeTime = 0;
+
         // Input handling
         this.canvas.addEventListener('mousedown', (e) => this.slingshot.onMouseDown(e.clientX, e.clientY));
         window.addEventListener('mousemove', (e) => this.slingshot.onMouseMove(e.clientX, e.clientY));
@@ -249,6 +253,16 @@ class Game {
         // Background is now handled by CSS/DOM layer behind canvas
         // HUD is also a DOM element behind canvas but z-index 5
 
+        // Screen Shake Logic
+        if (this.shakeTime > 0) {
+            const dx = (Math.random() - 0.5) * 10;
+            const dy = (Math.random() - 0.5) * 10;
+            this.gameContainer.style.transform = `translate(${dx}px, ${dy}px)`;
+            this.shakeTime--;
+        } else {
+            this.gameContainer.style.transform = 'none';
+        }
+
         // Debug safe area (optional)
         // this.ctx.strokeStyle = 'red';
         // this.ctx.strokeRect(0, 0, this.width, this.height - this.hudHeight);
@@ -302,6 +316,7 @@ class Game {
                 // Trigger Visuals
                 this.particles.spawnExplosion(blunt.x, blunt.y);
                 this.particles.spawnFloatingText(blunt.x, blunt.y, `+${this.round}`);
+                this.triggerShake(10); // Shake for 10 frames
 
                 // Round Progression
 
@@ -387,6 +402,10 @@ class Game {
     hideLeaderboard() {
         this.leaderboardScreen.classList.add('hidden');
         document.getElementById('start-screen').classList.remove('hidden');
+    }
+
+    triggerShake(duration) {
+        this.shakeTime = duration;
     }
 }
 
@@ -563,6 +582,7 @@ class Husky {
         this.gravity = 0.4;
         this.friction = 0.99;
         this.rotation = 0;
+        this.wobble = 0;
 
         this.sprite = new Sprite({
             image: this.game.assets['husky']
@@ -579,11 +599,19 @@ class Husky {
         // Calculate rotation based on velocity
         this.rotation = Math.atan2(this.dy, this.dx);
 
+        // Animate wobbling
+        this.wobble += 0.5;
+
         this.sprite.update(timestamp);
     }
 
     draw(ctx) {
-        this.sprite.draw(ctx, this.x, this.y, 70, 70, this.rotation);
+        // Procedural Animation: Squash and Stretch
+        const scale = 1 + Math.sin(this.wobble) * 0.25;
+        const width = 70 * scale;
+        const height = 70 * (2 - scale); // Preserve approximate area
+
+        this.sprite.draw(ctx, this.x, this.y, width, height, this.rotation);
     }
 }
 
