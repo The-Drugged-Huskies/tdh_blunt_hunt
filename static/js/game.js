@@ -75,6 +75,9 @@ class Game {
         this.startBtn.addEventListener('click', () => this.start());
         this.restartBtn.addEventListener('click', () => this.start());
 
+        this.exitBtn = document.getElementById('exit-btn');
+        if (this.exitBtn) this.exitBtn.addEventListener('click', () => this.exitToMenu());
+
         this.loop = this.loop.bind(this);
 
         // Populate hit markers for UI (10 slots for example)
@@ -118,6 +121,9 @@ class Game {
         document.getElementById('game-over-screen').classList.add('hidden');
         document.getElementById('nes-hud').classList.remove('hidden');
 
+        // Ensure Header is Visible (in case we came from Game Over -> Try Again)
+        document.getElementById('nes-header').style.visibility = 'visible';
+
         // Swap Leaderboard Button with Timer
         if (this.leaderboardBtn) this.leaderboardBtn.classList.add('hidden');
         document.getElementById('timer-display').classList.remove('hidden');
@@ -158,12 +164,29 @@ class Game {
         document.getElementById('final-score').innerText = this.score;
         document.getElementById('game-over-screen').classList.remove('hidden');
 
-        // Swap Back
+        // Hide Header (Leaderboard & Wallet)
+        document.getElementById('nes-header').style.visibility = 'hidden';
+
+        // Swap Back (logic kept for restart/exit consistency)
         document.getElementById('timer-display').classList.add('hidden');
         if (this.leaderboardBtn) this.leaderboardBtn.classList.remove('hidden');
 
         // Submit Score
         this.submitScore();
+    }
+
+    exitToMenu() {
+        document.getElementById('game-over-screen').classList.add('hidden');
+        document.getElementById('start-screen').classList.remove('hidden');
+
+        // Restore Header
+        document.getElementById('nes-header').style.visibility = 'visible';
+
+        // Reset State (optional but good for clean start)
+        this.score = 0;
+        this.round = 1;
+        this.hits = 0;
+        this.updateHitMarkers();
     }
 
     async submitScore() {
