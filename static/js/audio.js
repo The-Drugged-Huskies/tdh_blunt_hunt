@@ -507,12 +507,13 @@ class AudioManager {
     // --- Sound Synthesis ---
 
     playKick(time) {
+        const velocity = 0.9 + Math.random() * 0.2; // +/- 10% variation
         const osc = this.ctx.createOscillator();
         const gain = this.ctx.createGain();
         osc.frequency.setValueAtTime(120, time); // Thuddier
         osc.frequency.exponentialRampToValueAtTime(40, time + 0.5); // Deeper drop
 
-        const masterVol = 0.9 * this.musicVolume;
+        const masterVol = 0.9 * this.musicVolume * velocity;
         gain.gain.setValueAtTime(masterVol, time);
         gain.gain.exponentialRampToValueAtTime(0.01, time + 0.3);
         osc.connect(gain);
@@ -523,7 +524,7 @@ class AudioManager {
 
     playRimshot(time, volScale = 1.0) {
         // Natural Velocity Variation
-        const velocity = 0.8 + Math.random() * 0.4; // +/- 20% variation
+        const velocity = 0.7 + Math.random() * 0.6; // Wider variation (0.7 - 1.3)
         const effectiveVol = volScale * velocity;
 
         // High pitched resonant tone + noise knock
@@ -534,7 +535,7 @@ class AudioManager {
         osc.frequency.setValueAtTime(400, time);
         osc.frequency.exponentialRampToValueAtTime(100, time + 0.05);
 
-        // Reduced base volume (was 0.6)
+        // Reduced base volume
         gain.gain.setValueAtTime(0.25 * this.musicVolume * effectiveVol, time);
         gain.gain.exponentialRampToValueAtTime(0.01, time + 0.05);
 
@@ -554,7 +555,7 @@ class AudioManager {
         noiseFilter.frequency.value = 1500;
 
         const noiseGain = this.ctx.createGain();
-        // Reduced base volume (was 0.5)
+        // Reduced base volume
         noiseGain.gain.setValueAtTime(0.2 * this.musicVolume * effectiveVol, time);
         noiseGain.gain.exponentialRampToValueAtTime(0.01, time + 0.05);
 
@@ -568,6 +569,7 @@ class AudioManager {
     }
 
     playNoise(time, duration, filterFreq) {
+        const velocity = 0.8 + Math.random() * 0.4; // +/- 20% variation for that "loose" feel
         const bufferSize = this.ctx.sampleRate * duration;
         const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
         const data = buffer.getChannelData(0);
@@ -578,7 +580,7 @@ class AudioManager {
         filter.type = 'highpass';
         filter.frequency.value = filterFreq;
         const gain = this.ctx.createGain();
-        const masterVol = 0.15 * this.musicVolume;
+        const masterVol = 0.15 * this.musicVolume * velocity;
         gain.gain.value = masterVol;
         noise.connect(filter);
         filter.connect(gain);
@@ -587,6 +589,7 @@ class AudioManager {
     }
 
     playBass(time, freq, length) {
+        const velocity = 0.9 + Math.random() * 0.2; // Minor variation for consistency
         const osc = this.ctx.createOscillator();
         osc.type = 'sawtooth';
         osc.frequency.value = freq;
@@ -597,15 +600,15 @@ class AudioManager {
 
         // Deeper Filter Envelope
         filter.frequency.setValueAtTime(80, time); // Start lower
-        filter.frequency.exponentialRampToValueAtTime(400, time + 0.02); // Lower peak (was 600)
+        filter.frequency.exponentialRampToValueAtTime(400 * velocity, time + 0.02); // Velocity affects brightness
         filter.frequency.exponentialRampToValueAtTime(100, time + 0.2); // Settle lower (was 150)
 
         const gain = this.ctx.createGain();
         gain.gain.setValueAtTime(0, time);
 
         // Scale gain envelope points by musicVolume
-        const attackVal = 0.5 * this.musicVolume;
-        const sustainVal = 0.35 * this.musicVolume;
+        const attackVal = 0.5 * this.musicVolume * velocity;
+        const sustainVal = 0.35 * this.musicVolume * velocity;
 
         gain.gain.linearRampToValueAtTime(attackVal, time + 0.02); // Quieter attack (was 0.7)
         gain.gain.linearRampToValueAtTime(sustainVal, time + 0.1);  // Quieter sustain (was 0.5)
@@ -624,6 +627,9 @@ class AudioManager {
         const rootFreq = chord.freq;
         const thirdRatio = chord.isMinor ? 1.1892 : 1.2599;
 
+        // Humanize strumming (slight timing offset could be added here, but velocity is easier)
+        const strumVelocity = 0.85 + Math.random() * 0.3;
+
         [rootFreq, rootFreq * thirdRatio, rootFreq * 1.4983].forEach((freq, idx) => {
             const osc = this.ctx.createOscillator();
             osc.type = idx === 2 ? 'sawtooth' : 'square';
@@ -635,7 +641,7 @@ class AudioManager {
             const gain = this.ctx.createGain();
             osc.frequency.value = freq;
 
-            const masterVol = 0.19 * this.musicVolume;
+            const masterVol = 0.19 * this.musicVolume * strumVelocity;
             gain.gain.setValueAtTime(masterVol, time);
             gain.gain.exponentialRampToValueAtTime(0.01, time + duration);
 
