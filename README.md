@@ -45,7 +45,6 @@
     - **Armored**: Bounces shots, takes 2 hits.
 - [x] **Audio**: 
     - Procedural sound effects for shooting, hitting, and collisions.
-    - **Dynamic Music Engine**: Generates a small variation every run.
- 
+    - **Dynamic Music Engine**: Generates procedural Reggae/Dub variations every run. 
 ---
 *Built with ❤️ for the Dogechain Community.*
