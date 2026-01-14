@@ -52,38 +52,41 @@ canvas {
     height: 100%;
     pointer-events: none;
     /* Let clicks pass through to canvas */
+    display: flex;
+    flex-direction: column;
+}
+
+/* Status Bar Container */
+.status-bar {
+    width: 100%;
+    height: 80px;
+    background: rgba(0, 0, 0, 0.8);
+    border-bottom: 2px solid var(--accent-color);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 40px;
+    pointer-events: auto;
+    /* Allow clicks on buttons in standard bar */
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.5);
+    z-index: 10;
 }
 
 #score-board {
-    position: absolute;
-    top: 20px;
-    left: 30px;
+    /* Reset absolute positioning */
+    position: static;
     font-size: 1.5rem;
     font-weight: 900;
     text-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
     display: flex;
     gap: 40px;
     pointer-events: none;
-    /* Make sure it doesn't block canvas either */
-}
-
-#score-board {
-    position: absolute;
-    top: 20px;
-    left: 30px;
-    font-size: 1.5rem;
-    font-weight: 900;
-    text-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
-    display: flex;
-    gap: 40px;
-    pointer-events: none;
-    /* Make sure it doesn't block canvas either */
 }
 
 #wallet-container {
-    position: absolute;
-    top: 20px;
-    right: 30px;
+    /* Reset absolute positioning */
+    position: static;
     display: flex;
     align-items: center;
     gap: 15px;
