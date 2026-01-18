@@ -11,7 +11,8 @@
 }
 
 #multiplier-display {
-    color: #9d00ff; /* Neon Purple */
+    color: #9d00ff;
+    /* Neon Purple */
     font-size: 16px;
     text-shadow: 2px 2px 0px #000;
     margin-top: 5px;
@@ -19,7 +20,10 @@
     text-align: left;
     width: 100%;
 }
-.pulse { transform: scale(1.5); }
+
+.pulse {
+    transform: scale(1.5);
+}
 
 * {
     margin: 0;
@@ -547,3 +551,5 @@ canvas {
     cursor: pointer;
     width: 60px;
 }
+
+/* Landscape Enforcement */
