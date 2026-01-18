@@ -746,11 +746,57 @@ class AudioManager {
             const rampVol = 0.0075 * this.musicVolume;
 
             gain.gain.setValueAtTime(masterVol, time);
-            gain.gain.exponentialRampToValueAtTime(rampVol, time + 0.15);
+            gain.gain.linearRampToValueAtTime(rampVol, time + 0.15);
             osc.connect(gain);
             gain.connect(this.delayNode);
             osc.start(time);
             osc.stop(time + 0.15);
         }
+    }
+
+    playSiren() {
+        if (this.sfxVolume <= 0) return;
+        const now = this.ctx.currentTime;
+
+        // Dub Siren: Triangle wave with LFO modulation, heavily echoed
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        const lfo = this.ctx.createOscillator();
+        const lfoGain = this.ctx.createGain();
+
+        osc.type = 'triangle';
+        lfo.type = 'sine';
+        lfo.frequency.value = 8; // Speed of the "whoop-whoop"
+
+        // Pitch modulation
+        lfoGain.gain.value = 200; // Depth of modulation
+        osc.frequency.value = 600; // Base pitch
+
+        lfo.connect(lfoGain);
+        lfoGain.connect(osc.frequency);
+
+        // Env
+        gain.gain.setValueAtTime(0, now);
+        gain.gain.linearRampToValueAtTime(0.3 * this.sfxVolume, now + 0.1);
+        gain.gain.linearRampToValueAtTime(0.3 * this.sfxVolume, now + 1.5);
+        gain.gain.linearRampToValueAtTime(0, now + 2.0);
+
+        osc.connect(gain);
+
+        // Send to Delay (Dub Effect)
+        if (this.delayNode) {
+            const sendGain = this.ctx.createGain();
+            sendGain.gain.value = 0.8;
+            gain.connect(sendGain);
+            sendGain.connect(this.delayNode);
+        }
+
+        // And Main Out
+        gain.connect(this.ctx.destination);
+
+        osc.start(now);
+        lfo.start(now);
+        osc.stop(now + 2.0);
+        lfo.stop(now + 2.0);
     }
 }

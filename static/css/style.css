@@ -10,6 +10,17 @@
     --font-nes: 'Press Start 2P', cursive;
 }
 
+#multiplier-display {
+    color: #9d00ff; /* Neon Purple */
+    font-size: 16px;
+    text-shadow: 2px 2px 0px #000;
+    margin-top: 5px;
+    transition: opacity 0.2s, transform 0.1s;
+    text-align: left;
+    width: 100%;
+}
+.pulse { transform: scale(1.5); }
+
 * {
     margin: 0;
     padding: 0;

@@ -2,39 +2,54 @@
 
 **The Blunt Hunt** is a retro-style arcade game built for **Dogechain**, inspired by classic NES shooters. Launch a flying Husky from a physics-based slingshot to catch "Blunts" flying through the air!
 
-## 🎮 Gameplay
+---
 
-- **Objective**: Launch the Husky to intercept flying targets.
-- **Physics**: Realistic rubber band physics with "wobble" effects.
-- **Visuals**: 8-bit NES aesthetic with procedural animations and "juice" effects.
-- **Progression**: Increasing difficulty, combo systems, and special target types.
+## 🎮 How to Play
+
+**Objective**: Score as many points as possible before time runs out!
+
+### 🎯 The Blunts
+
+Identify your targets carefully.
+
+| Type | Color | HP | Points | Behavior |
+| :--- | :--- | :--- | :--- | :--- |
+| **Normal** | 🌿 Green | **1** | **10** | Standard flying path. |
+| **Gold** | 🟡 Gold | **1** | **50** | Fast moving! High value. |
+| **Armored** | ⚪ Grey | **2** | **25** | First hit bounces off (Safe!). Second hit destroys it. |
+
+### 🔥 Combo System
+
+Build your streak to maximize your score!
+
+- **Streak Multiplier**: Your multiplier increases with every consecutive hit (up to **5x**).
+  - 1 Hit: **1x**
+  - 2 Hits: **2x**
+  - ...
+  - 5+ Hits: **5x (MAX)**
+- **Reset**: If a Blunt escapes off-screen or the Husky misses everything, your combo resets to **0**.
+- **Armored Strategy**: Hitting an Armored Blunt (the "Clink") **keeps your streak alive**. Destroying it adds to the streak.
+
+### ⏳ Time Bonuses
+
+Extend your run!
+
+- **Round Clear**: Advancing to the next round grants **+5 Seconds**.
+
+---
 
 ## 🕹️ Controls
 
-- **Aim & Shoot**: Drag the slingshot to aim and power up. Release to fire.
-- **Mobile**: Full touch support.
+- **Desktop**: Click and drag the slingshot to aim. Release to fire.
+- **Mobile**: Touch and drag to aim. Release to fire.
 
-## 🚀 Quick Start
+---
 
-1. **Install Dependencies**:
+## 🚀 Quick Start (Dev)
 
-   ```bash
-   pip install flask
-   ```
-
-2. **Run**:
-
-   ```bash
-   python app.py
-   ```
-
+1. **Install**: `pip install flask`
+2. **Run**: `python app.py`
 3. **Play**: `http://localhost:5000`
-
-## 🛠️ Tech Stack
-
-- **Frontend**: Vanilla JS (Canvas), Custom Sprite System.
-- **Backend**: Python (Flask).
-- **Network**: Dogechain (Wallet Connect).
 
 ---
 *Built for the Dogechain Community.*

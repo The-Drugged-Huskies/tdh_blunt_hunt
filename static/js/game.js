@@ -201,6 +201,8 @@ class Game {
         this.round = 1;
         this.hitsInRound = 0;
         this.speedMultiplier = 1;
+        this.combo = 0;
+        this.multiplier = 1;
 
         // Update UI
         this.updateScore(0);
@@ -315,6 +317,31 @@ class Game {
         hudCenter.classList.add('flash-success');
         setTimeout(() => hudCenter.classList.remove('flash-success'), 1500);
 
+        // Audio Effect
+        this.audio.playSiren();
+
+        // Time Bonus
+        this.gameDuration += 5;
+
+        // Visual DOM Effect (Next to Timer)
+        const headerLeft = document.getElementById('header-left');
+        if (headerLeft) {
+            const bonus = document.createElement('div');
+            bonus.innerText = '+5 SEC';
+            bonus.style.color = '#00ff00';
+            bonus.style.marginLeft = '15px';
+            bonus.style.fontWeight = 'bold';
+            bonus.style.transition = 'opacity 1s';
+            bonus.id = 'bonus-indicator'; // prevent dups handling if needed
+
+            headerLeft.appendChild(bonus);
+
+            setTimeout(() => {
+                bonus.style.opacity = '0';
+                setTimeout(() => bonus.remove(), 1000);
+            }, 2000);
+        }
+
         // Reset visuals for round progression
         this.hits = 0;
         this.updateHitMarkers();
@@ -427,6 +454,8 @@ class Game {
                     this.husky.dx *= -0.8;
                     this.husky.dy *= -0.8;
 
+                    this.shotHit = true; // Keep combo alive on armor hit!
+
                     this.audio.clink(); // PLAY CLINK
                     this.particles.spawnFloatingText(blunt.x, blunt.y, "CLINK!", '#aaa');
                     this.particles.spawnExplosion(blunt.x, blunt.y, '#ccc');
@@ -436,14 +465,18 @@ class Game {
                     // Track Hit for Combo
                     this.shotHit = true;
                     this.combo++;
-                    // Simple multiplier logic: Every 2 hits increases tier (1x -> 2x -> 4x -> 8x)
-                    // limit to 8x
-                    this.multiplier = Math.min(8, Math.pow(2, Math.floor(this.combo / 2)));
-                    if (this.combo < 1) this.multiplier = 1;
+
+                    // Linear Multiplier (1 hit = 1x, 2 hits = 2x, etc.)
+                    // Minimum 1x
+                    this.multiplier = Math.min(5, Math.max(1, this.combo));
 
                     // Score based on Blunt Value
-                    const points = result.score * this.multiplier;
+                    // Total Multiplier = Combo * Round
+                    const totalMultiplier = this.multiplier * this.round;
+
+                    const points = result.score * totalMultiplier;
                     this.updateScore(points);
+
 
                     // Trigger Visuals
                     if (blunt.type === 'gold') {
@@ -454,10 +487,14 @@ class Game {
                     this.particles.spawnExplosion(blunt.x, blunt.y, blunt.type === 'gold' ? '#FFD700' : '#8b4513');
 
                     let text = `+${points}`;
-                    if (this.multiplier > 1) {
-                        text += ` (x${this.multiplier}!)`;
-                    }
                     this.particles.spawnFloatingText(blunt.x, blunt.y, text, blunt.type === 'gold' ? '#FFD700' : '#fff');
+
+                    // Show multiplier details if significant (Separate Line)
+                    // Show multiplier details if significant (Separate Line)
+                    if (this.multiplier > 1) {
+                        const multText = `x${this.multiplier}`;
+                        this.particles.spawnFloatingText(blunt.x, blunt.y + 20, multText, '#9d00ff');
+                    }
                     this.triggerShake(10); // Shake for 10 frames
 
                     // Round Progression
@@ -783,13 +820,14 @@ class Blunt {
         if (rand < 0.1) { // 10% Golden
             this.type = 'gold';
             this.speed *= 1.5;
-            this.basePoints = 50;
+            this.hp = 1;
+            this.basePoints = 50; // 5x Standard
             this.color = '#FFD700';
         } else if (rand < 0.25) { // 15% Armored
             this.type = 'armored';
             this.speed *= 0.8;
             this.hp = 2; // Takes 2 hits
-            this.basePoints = 20;
+            this.basePoints = 25;
             this.color = '#A0A0A0';
         }
 
