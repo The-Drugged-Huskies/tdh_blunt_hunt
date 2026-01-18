@@ -1,6 +1,6 @@
-# The Blunt Hunt - Developer User Guide
+# Blunt Hunt - Developer User Guide
 
-This document contains internal development notes, deployment instructions, and maintenance details for **The Blunt Hunt**.
+This document contains internal development notes, deployment instructions, and maintenance details for **Blunt Hunt**.
 
 ## 📂 Project Structure
 
