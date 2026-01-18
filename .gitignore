@@ -5,4 +5,6 @@ venv/
 .env
 static/data/leaderboard.json
 .DS_Store
+TODO.md
+TODO
 
