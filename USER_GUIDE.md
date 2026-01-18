@@ -34,7 +34,7 @@ This document contains internal development notes, deployment instructions, and 
 
 - Triggered when `hitsInRound >= 10`.
 - **Speed**: Increases by 20% per round (`this.speedMultiplier += 0.2`).
-- **Time Bonus**: Adds **5 seconds** to `this.gameDuration` (`game.js:324`).
+- **Time Bonus**: Adds **5 seconds** to `this.gameDuration`.
   - *Visual*: Injects a temporary DOM element into `#header-left` for the "+5 SEC" green text.
 
 ## 🎵 Audio System (`audio.js`)
