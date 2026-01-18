@@ -551,31 +551,3 @@ canvas {
     cursor: pointer;
     width: 60px;
 }
-
-/* Landscape Enforcement */
-#rotate-overlay {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: #000;
-    z-index: 9999;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    color: var(--nes-green);
-    text-align: center;
-    padding: 20px;
-}
-
-@media screen and (orientation: portrait) and (max-width: 1024px) {
-    #rotate-overlay {
-        display: flex;
-    }
-
-    #nes-wrapper {
-        display: none;
-    }
-}
