@@ -308,7 +308,15 @@ window.payEntryFee = async () => {
         const tx = await contract.startGame({
             value: ethers.utils.parseEther(GAME_COST_DOGE)
         });
-        console.log("Payment sent:", tx.hash);
+        console.log("------------------------------------------");
+        console.log("💰 Payment Sent!");
+        console.log(`Msg Value: ${GAME_COST_DOGE} DOGE`);
+        console.log(`Expected Split -> Owner: ${(parseFloat(GAME_COST_DOGE) * 0.25).toFixed(2)} | Pot: ${(parseFloat(GAME_COST_DOGE) * 0.75).toFixed(2)}`);
+        console.log(`Tx Hash: ${tx.hash}`);
+        console.log(`Explorer: https://explorer.dogechain.dog/tx/${tx.hash}`);
+        console.log("ℹ️ Check 'Internal Transactions' tab on Explorer to verify the 0.25 DOGE transfer.");
+        console.log("------------------------------------------");
+
         await tx.wait();
         console.log("Payment confirmed! Game starting...");
         return { success: true };
