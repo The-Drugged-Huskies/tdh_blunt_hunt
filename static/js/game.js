@@ -275,7 +275,6 @@ class Game {
 
         // ALWAYS Force Payment (Ticket System)
         if (window.payEntryFee) {
-            this.startBtn.innerText = "PAYING...";
             this.startBtn.disabled = true;
 
             try {
@@ -284,7 +283,7 @@ class Game {
 
                 if (!result || !result.success) {
                     // Payment Failed or Cancelled
-                    this.startBtn.innerText = "PAY 1 DOGE";
+                    // this.startBtn.innerText = "PAY 1 DOGE"; // No change needed
                     this.startBtn.disabled = false;
                     return; // Stop here
                 }
@@ -293,14 +292,13 @@ class Game {
 
             } catch (e) {
                 console.error("Payment Error:", e);
-                this.startBtn.innerText = "ERROR";
-                setTimeout(() => {
-                    this.startBtn.innerText = "PAY 1 DOGE";
-                    this.startBtn.disabled = false;
-                }, 2000);
+                // this.startBtn.innerText = "ERROR";
+                this.startBtn.disabled = false;
                 return;
             }
+            return;
         }
+    }
 
 
         document.getElementById('start-screen').classList.add('hidden');
@@ -310,549 +308,552 @@ class Game {
         // Ensure Header is Visible (in case we came from Game Over -> Try Again)
         document.getElementById('nes-header').style.visibility = 'visible';
 
-        // Swap Leaderboard Button with Timer
-        if (this.leaderboardBtn) this.leaderboardBtn.classList.add('hidden');
-        document.getElementById('timer-display').classList.remove('hidden');
+    // Swap Leaderboard Button with Timer
+    if(this.leaderboardBtn) this.leaderboardBtn.classList.add('hidden');
+document.getElementById('timer-display').classList.remove('hidden');
 
-        // Reset State
-        this.score = 0;
-        this.round = 1;
-        this.hitsInRound = 0;
-        this.speedMultiplier = 1;
-        this.combo = 0;
-        this.multiplier = 1;
+// Reset State
+this.score = 0;
+this.round = 1;
+this.hitsInRound = 0;
+this.speedMultiplier = 1;
+this.combo = 0;
+this.multiplier = 1;
 
-        // Update UI
-        this.updateScore(0);
-        document.getElementById('round-display').innerText = `R=${this.round}`;
+// Update UI
+this.updateScore(0);
+document.getElementById('round-display').innerText = `R=${this.round}`;
 
-        // Set Background Image directly on DOM
-        const bgDiv = document.getElementById('game-background');
-        if (bgDiv && this.assets['background']) {
-            bgDiv.style.backgroundImage = `url('${this.assets['background'].src}')`;
-        }
+// Set Background Image directly on DOM
+const bgDiv = document.getElementById('game-background');
+if (bgDiv && this.assets['background']) {
+    bgDiv.style.backgroundImage = `url('${this.assets['background'].src}')`;
+}
 
-        this.blunts = [];
-        this.husky = null;
-        this.isRunning = true;
-        this.hits = 0; // Total hits (visual dots)
-        this.updateHitMarkers();
-        this.bluntLifeTime = 5000;
-        this.lastSpawnTime = performance.now();
+this.blunts = [];
+this.husky = null;
+this.isRunning = true;
+this.hits = 0; // Total hits (visual dots)
+this.updateHitMarkers();
+this.bluntLifeTime = 5000;
+this.lastSpawnTime = performance.now();
 
-        // Timer Logic
-        this.gameDuration = 60; // seconds
-        this.startTime = performance.now();
+// Timer Logic
+this.gameDuration = 60; // seconds
+this.startTime = performance.now();
 
-        // Start Music
-        this.audio.startMusic();
+// Start Music
+this.audio.startMusic();
 
-        requestAnimationFrame(this.loop);
+requestAnimationFrame(this.loop);
     }
 
     async gameOver() {
-        this.isRunning = false;
-        this.ctx.clearRect(0, 0, this.width, this.height);
-        this.audio.stopMusic();
+    this.isRunning = false;
+    this.ctx.clearRect(0, 0, this.width, this.height);
+    this.audio.stopMusic();
 
-        document.getElementById('final-score').innerText = this.score;
-        document.getElementById('game-over-screen').classList.remove('hidden');
+    document.getElementById('final-score').innerText = this.score;
+    document.getElementById('game-over-screen').classList.remove('hidden');
 
-        // Hide both menus initially to prevent flashing
-        this.submitScoreContainer.classList.add('hidden');
+    // Hide both menus initially to prevent flashing
+    this.submitScoreContainer.classList.add('hidden');
+    this.gameOverMenu.classList.add('hidden');
+
+    // Hide Header
+    document.getElementById('nes-header').style.visibility = 'hidden';
+
+    // Check Eligibility for Leaderboard
+    const wallet = window.getCurrentWallet ? window.getCurrentWallet() : null;
+
+    console.log("GameOver Debug: Score", this.score, "Wallet", wallet);
+
+    if (wallet) {
+        // Show Submit UI Immediately
+        this.submitScoreContainer.classList.remove('hidden');
         this.gameOverMenu.classList.add('hidden');
 
-        // Hide Header
-        document.getElementById('nes-header').style.visibility = 'hidden';
+        // Async Check for Top Score Message
+        const statusText = document.getElementById('submit-status-text');
+        if (statusText) statusText.style.display = 'none';
 
-        // Check Eligibility for Leaderboard
-        const wallet = window.getCurrentWallet ? window.getCurrentWallet() : null;
-
-        console.log("GameOver Debug: Score", this.score, "Wallet", wallet);
-
-        if (wallet) {
-            // Show Submit UI Immediately
-            this.submitScoreContainer.classList.remove('hidden');
-            this.gameOverMenu.classList.add('hidden');
-
-            // Async Check for Top Score Message
-            const statusText = document.getElementById('submit-status-text');
-            if (statusText) statusText.style.display = 'none';
-
-            if (window.checkIsTopScore && this.score > 0) {
-                window.checkIsTopScore(this.score).then(isTop => {
-                    if (isTop && statusText) statusText.style.display = 'block';
-                });
-            }
-        } else {
-            console.log("No wallet connected, showing standard menu.");
-            this.showGameOverMenu();
+        if (window.checkIsTopScore && this.score > 0) {
+            window.checkIsTopScore(this.score).then(isTop => {
+                if (isTop && statusText) statusText.style.display = 'block';
+            });
         }
-
-        // Swap Back UI
-        document.getElementById('timer-display').classList.add('hidden');
-        if (this.leaderboardBtn) this.leaderboardBtn.classList.remove('hidden');
-    }
-
-    showGameOverMenu() {
-        this.submitScoreContainer.classList.add('hidden');
-        this.gameOverMenu.classList.remove('hidden');
-    }
-
-    async submitScoreToChain() {
-        if (!window.submitHighScore) return;
-
-        this.submitScoreBtn.innerText = "SUBMITTING...";
-        this.submitScoreBtn.disabled = true;
-
-        const result = await window.submitHighScore(this.score);
-
-        this.submitScoreBtn.innerText = "SUBMIT TO CHAIN";
-        this.submitScoreBtn.disabled = false;
-
-        if (result.success) {
-            // alert("Score Submitted Successfully!"); // Removed alert
-        } else {
-            // alert("Submission Failed: " + (result.reason || "Unknown Error")); // Removed alert
-        }
-
-        // Always show menu after attempt
+    } else {
+        console.log("No wallet connected, showing standard menu.");
         this.showGameOverMenu();
     }
 
-    exitToMenu() {
-        document.getElementById('game-over-screen').classList.add('hidden');
-        document.getElementById('start-screen').classList.remove('hidden');
-        document.getElementById('nes-hud').classList.add('hidden');
+    // Swap Back UI
+    document.getElementById('timer-display').classList.add('hidden');
+    if (this.leaderboardBtn) this.leaderboardBtn.classList.remove('hidden');
+}
 
-        // Restore Header
-        document.getElementById('nes-header').style.visibility = 'visible';
+showGameOverMenu() {
+    this.submitScoreContainer.classList.add('hidden');
+    this.gameOverMenu.classList.remove('hidden');
+}
 
-        // Reset State (optional but good for clean start)
-        this.score = 0;
-        this.round = 1;
-        this.hits = 0;
-        this.updateHitMarkers();
+    async submitScoreToChain() {
+    if (!window.submitHighScore) return;
+
+    this.submitScoreBtn.innerText = "SUBMITTING...";
+    this.submitScoreBtn.disabled = true;
+
+    const result = await window.submitHighScore(this.score);
+
+    this.submitScoreBtn.innerText = "SUBMIT TO CHAIN";
+    this.submitScoreBtn.disabled = false;
+
+    if (result.success) {
+        // alert("Score Submitted Successfully!"); // Removed alert
+    } else {
+        // alert("Submission Failed: " + (result.reason || "Unknown Error")); // Removed alert
     }
 
+    // Always show menu after attempt
+    this.showGameOverMenu();
+}
+
+exitToMenu() {
+    document.getElementById('game-over-screen').classList.add('hidden');
+    document.getElementById('start-screen').classList.remove('hidden');
+    document.getElementById('nes-hud').classList.add('hidden');
+
+    // Restore Header
+    document.getElementById('nes-header').style.visibility = 'visible';
+
+    // Reset Start Button State (just in case)
+    if (this.startBtn) this.startBtn.disabled = false;
+
+    // Reset State (optional but good for clean start)
+    this.score = 0;
+    this.round = 1;
+    this.hits = 0;
+    this.updateHitMarkers();
+}
 
 
-    updateScore(points) {
-        this.score += points;
-        // Pad score to 6 digits
-        const scoreStr = this.score.toString().padStart(6, '0');
-        document.getElementById('score').innerText = scoreStr;
 
-        if (points > 0) {
-            // this.hits++; removed, handled in collision
-            // this.updateHitMarkers();
-        }
+updateScore(points) {
+    this.score += points;
+    // Pad score to 6 digits
+    const scoreStr = this.score.toString().padStart(6, '0');
+    document.getElementById('score').innerText = scoreStr;
 
-        // Increase difficulty based on total score or rounds if desired
-        // this.bluntLifeTime = Math.max(1000, 5000 - (this.score * 100));
+    if (points > 0) {
+        // this.hits++; removed, handled in collision
+        // this.updateHitMarkers();
     }
 
-    advanceRound() {
-        this.round++;
-        this.speedMultiplier += 0.2; // 20% speed increase per round
-        this.hitsInRound = 0;
+    // Increase difficulty based on total score or rounds if desired
+    // this.bluntLifeTime = Math.max(1000, 5000 - (this.score * 100));
+}
 
-        // Update UI
-        document.getElementById('round-display').innerText = `R=${this.round}`;
+advanceRound() {
+    this.round++;
+    this.speedMultiplier += 0.2; // 20% speed increase per round
+    this.hitsInRound = 0;
 
-        // Visual Effect
-        const hudCenter = document.querySelector('.hud-section.center');
-        hudCenter.classList.add('flash-success');
-        setTimeout(() => hudCenter.classList.remove('flash-success'), 1500);
+    // Update UI
+    document.getElementById('round-display').innerText = `R=${this.round}`;
 
-        // Audio Effect
-        this.audio.playSiren();
+    // Visual Effect
+    const hudCenter = document.querySelector('.hud-section.center');
+    hudCenter.classList.add('flash-success');
+    setTimeout(() => hudCenter.classList.remove('flash-success'), 1500);
 
-        // Time Bonus
-        this.gameDuration += 5;
+    // Audio Effect
+    this.audio.playSiren();
 
-        // Visual DOM Effect (Next to Timer)
-        const headerLeft = document.getElementById('header-left');
-        if (headerLeft) {
-            const bonus = document.createElement('div');
-            bonus.innerText = '+5 SEC';
-            bonus.style.color = '#00ff00';
-            bonus.style.marginLeft = '15px';
-            bonus.style.fontWeight = 'bold';
-            bonus.style.transition = 'opacity 1s';
-            bonus.id = 'bonus-indicator'; // prevent dups handling if needed
+    // Time Bonus
+    this.gameDuration += 5;
 
-            headerLeft.appendChild(bonus);
+    // Visual DOM Effect (Next to Timer)
+    const headerLeft = document.getElementById('header-left');
+    if (headerLeft) {
+        const bonus = document.createElement('div');
+        bonus.innerText = '+5 SEC';
+        bonus.style.color = '#00ff00';
+        bonus.style.marginLeft = '15px';
+        bonus.style.fontWeight = 'bold';
+        bonus.style.transition = 'opacity 1s';
+        bonus.id = 'bonus-indicator'; // prevent dups handling if needed
 
-            setTimeout(() => {
-                bonus.style.opacity = '0';
-                setTimeout(() => bonus.remove(), 1000);
-            }, 2000);
-        }
+        headerLeft.appendChild(bonus);
 
-        // Reset visuals for round progression
-        this.hits = 0;
-        this.updateHitMarkers();
+        setTimeout(() => {
+            bonus.style.opacity = '0';
+            setTimeout(() => bonus.remove(), 1000);
+        }, 2000);
     }
 
-    updateHitMarkers() {
-        const markers = this.hitMarkers.children;
-        for (let i = 0; i < markers.length; i++) {
-            if (i < this.hits) {
-                markers[i].classList.add('active');
-            } else {
-                markers[i].classList.remove('active');
-            }
-        }
-    }
+    // Reset visuals for round progression
+    this.hits = 0;
+    this.updateHitMarkers();
+}
 
-    togglePause() {
-        if (!this.isRunning) return;
-
-        this.isPaused = !this.isPaused;
-
-        if (this.isPaused) {
-            if (this.pauseScreen) this.pauseScreen.classList.remove('hidden');
-            // Optional: Suspend audio
-            // if (this.audio.ctx.state === 'running') this.audio.ctx.suspend();
+updateHitMarkers() {
+    const markers = this.hitMarkers.children;
+    for (let i = 0; i < markers.length; i++) {
+        if (i < this.hits) {
+            markers[i].classList.add('active');
         } else {
-            if (this.pauseScreen) this.pauseScreen.classList.add('hidden');
-            // Optional: Resume audio
-            // if (this.audio.ctx.state === 'suspended') this.audio.ctx.resume();
-
-            // Fix delta time spike to prevent game jump
-            this.lastTime = performance.now();
-            this.lastSpawnTime = performance.now() - (this.lastSpawnTime % this.bluntSpawnRate);
-
-            // Re-trigger loop if it stopped (though we just returned early usually)
-            requestAnimationFrame(this.loop);
+            markers[i].classList.remove('active');
         }
     }
+}
 
-    updateTimer(timestamp) {
-        const elapsed = (timestamp - this.startTime) / 1000;
-        const remaining = Math.max(0, this.gameDuration - elapsed);
+togglePause() {
+    if (!this.isRunning) return;
 
-        const seconds = Math.ceil(remaining);
-        const fmt = seconds < 10 ? `0${seconds}` : seconds;
+    this.isPaused = !this.isPaused;
 
-        // Update Timer Display in HUD
-        const timerEl = document.getElementById('timer-display');
-        if (timerEl) {
-            timerEl.innerText = `TIME: ${fmt}`;
-            // Red warning
-            timerEl.style.color = remaining < 10 ? 'red' : 'white';
-        }
+    if (this.isPaused) {
+        if (this.pauseScreen) this.pauseScreen.classList.remove('hidden');
+        // Optional: Suspend audio
+        // if (this.audio.ctx.state === 'running') this.audio.ctx.suspend();
+    } else {
+        if (this.pauseScreen) this.pauseScreen.classList.add('hidden');
+        // Optional: Resume audio
+        // if (this.audio.ctx.state === 'suspended') this.audio.ctx.resume();
 
-        if (remaining <= 0) {
-            this.gameOver();
-        }
-        // No timer display in NES HUD for now, or could map to one of the boxes
-    }
+        // Fix delta time spike to prevent game jump
+        this.lastTime = performance.now();
+        this.lastSpawnTime = performance.now() - (this.lastSpawnTime % this.bluntSpawnRate);
 
-    loop(timestamp) {
-        if (!this.isRunning) return;
-        if (this.isPaused) return;
-
-        this.ctx.clearRect(0, 0, this.width, this.height);
-
-
-
-        // Background is now handled by CSS/DOM layer behind canvas
-        // HUD is also a DOM element behind canvas but z-index 5
-
-        // Screen Shake Logic
-        if (this.shakeTime > 0) {
-            const dx = (Math.random() - 0.5) * 10;
-            const dy = (Math.random() - 0.5) * 10;
-            this.gameContainer.style.transform = `translate(${dx}px, ${dy}px)`;
-            this.shakeTime--;
-        } else {
-            this.gameContainer.style.transform = 'none';
-        }
-
-        // Debug safe area (optional)
-        // this.ctx.strokeStyle = 'red';
-        // this.ctx.strokeRect(0, 0, this.width, this.height - this.hudHeight);
-
-        this.updateTimer(timestamp);
-        if (!this.isRunning) return; // Stop drawing if game ended in updateTimer
-
-        // Update & Draw Particles (Behind sprites or on top? On top usually)
-        this.particles.update();
-        this.particles.draw(this.ctx);
-
-        // Update & Draw Slingshot
-        this.slingshot.draw(this.ctx);
-
-        // Update & Draw Husky
-        if (this.husky) {
-            this.husky.update(timestamp);
-            this.husky.draw(this.ctx);
-
-            // Check boundaries
-            if (this.husky.y > this.height + 100 || this.husky.x > this.width + 100 || this.husky.x < -100) {
-                // Combo Reset on Miss
-                if (!this.shotHit) {
-                    this.combo = 0;
-                    this.multiplier = 1;
-                }
-
-                this.husky = null; // Reset husky if it goes off screen
-                this.slingshot.reset();
-            }
-        }
-
-        // Spawn Blunts
-        if (timestamp - this.lastSpawnTime > this.bluntSpawnRate) {
-            this.spawnBlunt();
-            this.lastSpawnTime = timestamp;
-        }
-
-        // Update & Draw Blunts
-        for (let i = this.blunts.length - 1; i >= 0; i--) {
-            let blunt = this.blunts[i];
-            blunt.update(timestamp);
-            blunt.draw(this.ctx);
-
-            // Collision Detection
-            if (this.husky && this.checkCollision(this.husky, blunt)) {
-
-                const result = blunt.hit();
-                if (!result.hit) continue; // Cooldown active, ignore collision
-
-                if (!result.destroyed) {
-                    // Armored Clink - Bounce husky
-                    this.husky.dx *= -0.8;
-                    this.husky.dy *= -0.8;
-
-                    this.shotHit = true; // Keep combo alive on armor hit!
-
-                    this.audio.clink(); // PLAY CLINK
-                    this.particles.spawnFloatingText(blunt.x, blunt.y, "CLINK!", '#aaa');
-                    this.particles.spawnExplosion(blunt.x, blunt.y, '#ccc');
-                } else {
-                    this.blunts.splice(i, 1);
-
-                    // Track Hit for Combo
-                    this.shotHit = true;
-                    this.combo++;
-
-                    // Linear Multiplier (1 hit = 1x, 2 hits = 2x, etc.)
-                    // Minimum 1x
-                    this.multiplier = Math.min(5, Math.max(1, this.combo));
-
-                    // Score based on Blunt Value
-                    // Total Multiplier = Combo * Round
-                    const totalMultiplier = this.multiplier * this.round;
-
-                    const points = result.score * totalMultiplier;
-                    this.updateScore(points);
-
-
-                    // Trigger Visuals
-                    if (blunt.type === 'gold') {
-                        this.audio.goldHit();
-                    } else {
-                        this.audio.hit(); // PLAY CRUNCH
-                    }
-                    this.particles.spawnExplosion(blunt.x, blunt.y, blunt.type === 'gold' ? '#FFD700' : '#8b4513');
-
-                    let text = `+${points}`;
-                    this.particles.spawnFloatingText(blunt.x, blunt.y, text, blunt.type === 'gold' ? '#FFD700' : '#fff');
-
-                    // Show multiplier details if significant (Separate Line)
-                    // Show multiplier details if significant (Separate Line)
-                    if (this.multiplier > 1) {
-                        const multText = `x${this.multiplier}`;
-                        this.particles.spawnFloatingText(blunt.x, blunt.y + 20, multText, '#9d00ff');
-                    }
-                    this.triggerShake(10); // Shake for 10 frames
-
-                    // Round Progression
-                    this.hitsInRound++;
-
-                    // Update hit markers visually
-                    this.hits = this.hitsInRound;
-                    this.updateHitMarkers();
-
-                    if (this.hitsInRound >= 10) {
-                        this.advanceRound();
-                    }
-                }
-
-                continue;
-            }
-
-            // Remove if expired
-            if (blunt.isExpired(timestamp)) {
-                this.blunts.splice(i, 1);
-            }
-        }
-
+        // Re-trigger loop if it stopped (though we just returned early usually)
         requestAnimationFrame(this.loop);
     }
+}
 
-    spawnBlunt() {
-        const x = Math.random() * (this.width - 100) + 50;
+updateTimer(timestamp) {
+    const elapsed = (timestamp - this.startTime) / 1000;
+    const remaining = Math.max(0, this.gameDuration - elapsed);
 
-        // Dynamic Spawn Range
-        // Keep blunts strictly above the sling (which is at height - 90)
-        const topLimit = 50; // Clear top header
-        const bottomLimit = this.height - 150; // Keep well above sling (safe zone for amplitude)
-        const spawnRange = Math.max(30, bottomLimit - topLimit);
+    const seconds = Math.ceil(remaining);
+    const fmt = seconds < 10 ? `0${seconds}` : seconds;
 
-        const y = Math.random() * spawnRange + topLimit;
-        this.blunts.push(new Blunt(this, x, y, this.bluntLifeTime, this.speedMultiplier));
+    // Update Timer Display in HUD
+    const timerEl = document.getElementById('timer-display');
+    if (timerEl) {
+        timerEl.innerText = `TIME: ${fmt}`;
+        // Red warning
+        timerEl.style.color = remaining < 10 ? 'red' : 'white';
     }
 
-    checkCollision(husky, blunt) {
-        // 1. Fast Distance Check (Bounding Circle) to filter obvious misses
-        // Husky radius ~25, Blunt ~25. Max possible visual size ~35-40.
-        // We use a generous threshold (80px sum) to ensure we don't filter out valid squash/stretch hits.
-        const dx = husky.x - blunt.x;
-        const dy = husky.y - blunt.y;
-        const distSq = dx * dx + dy * dy;
-        const threshold = 80;
-        if (distSq > threshold * threshold) return false;
+    if (remaining <= 0) {
+        this.gameOver();
+    }
+    // No timer display in NES HUD for now, or could map to one of the boxes
+}
 
-        // 2. Pixel-Perfect Check
-        const ctx = this.collisionCtx;
-        const canvas = this.collisionCanvas;
+loop(timestamp) {
+    if (!this.isRunning) return;
+    if (this.isPaused) return;
 
-        // Set canvas size to the bounding area of interaction (sufficiently large)
-        canvas.width = 150;
-        canvas.height = 150;
+    this.ctx.clearRect(0, 0, this.width, this.height);
 
-        ctx.clearRect(0, 0, 150, 150);
 
-        // Center the operation in the canvas
-        // We want (husky.x, husky.y) and (blunt.x, blunt.y) to map to near the center (75, 75).
-        // Midpoint of the two objects
-        const midX = (husky.x + blunt.x) / 2;
-        const midY = (husky.y + blunt.y) / 2;
 
-        ctx.save();
-        ctx.translate(75 - midX, 75 - midY);
+    // Background is now handled by CSS/DOM layer behind canvas
+    // HUD is also a DOM element behind canvas but z-index 5
 
-        // A. Draw Husky (Destination)
-        husky.draw(ctx);
+    // Screen Shake Logic
+    if (this.shakeTime > 0) {
+        const dx = (Math.random() - 0.5) * 10;
+        const dy = (Math.random() - 0.5) * 10;
+        this.gameContainer.style.transform = `translate(${dx}px, ${dy}px)`;
+        this.shakeTime--;
+    } else {
+        this.gameContainer.style.transform = 'none';
+    }
 
-        // B. Draw Blunt (Source-In)
-        ctx.globalCompositeOperation = 'source-in';
+    // Debug safe area (optional)
+    // this.ctx.strokeStyle = 'red';
+    // this.ctx.strokeRect(0, 0, this.width, this.height - this.hudHeight);
 
-        // We call the blunt's sprite directly to avoid GCO issues from the blunt.draw() method
-        // Blunt.draw uses size 60, 60.
-        blunt.sprite.draw(ctx, blunt.x, blunt.y, 60, 60, 0);
+    this.updateTimer(timestamp);
+    if (!this.isRunning) return; // Stop drawing if game ended in updateTimer
 
-        ctx.restore();
+    // Update & Draw Particles (Behind sprites or on top? On top usually)
+    this.particles.update();
+    this.particles.draw(this.ctx);
 
-        // 3. Scan for overlapping pixels
-        // We only need to scan the center area where they likely overlap
-        const pData = ctx.getImageData(0, 0, 150, 150).data;
+    // Update & Draw Slingshot
+    this.slingshot.draw(this.ctx);
 
-        // Loop through alpha channel (every 4th byte)
-        // Optimization: checking every 4th or 8th pixel is usually enough effectively
-        for (let i = 3; i < pData.length; i += 16) { // Check every 4th pixel (i += 4 * 4)
-            if (pData[i] > 0) {
-                console.log(`[PixelHit] Hit at index ${i}, Alpha: ${pData[i]}`);
-                return true;
+    // Update & Draw Husky
+    if (this.husky) {
+        this.husky.update(timestamp);
+        this.husky.draw(this.ctx);
+
+        // Check boundaries
+        if (this.husky.y > this.height + 100 || this.husky.x > this.width + 100 || this.husky.x < -100) {
+            // Combo Reset on Miss
+            if (!this.shotHit) {
+                this.combo = 0;
+                this.multiplier = 1;
             }
+
+            this.husky = null; // Reset husky if it goes off screen
+            this.slingshot.reset();
         }
-
-        return false;
     }
-    async showLeaderboard() {
-        this.leaderboardScreen.classList.remove('hidden');
-        document.getElementById('start-screen').classList.add('hidden');
 
-        // Loading State
-        this.leaderboardRows.innerHTML = '<p class="nes-text is-primary" style="text-align:center; margin-top: 20px;">Loading from Dogechain...</p>';
+    // Spawn Blunts
+    if (timestamp - this.lastSpawnTime > this.bluntSpawnRate) {
+        this.spawnBlunt();
+        this.lastSpawnTime = timestamp;
+    }
 
-        try {
-            // Fetch from Chain
-            let data = [];
-            if (window.fetchLeaderboard) {
-                data = await window.fetchLeaderboard();
-            }
+    // Update & Draw Blunts
+    for (let i = this.blunts.length - 1; i >= 0; i--) {
+        let blunt = this.blunts[i];
+        blunt.update(timestamp);
+        blunt.draw(this.ctx);
 
-            // Fallback or empty
-            if (!data || data.length === 0) {
-                this.leaderboardRows.innerHTML = '<p style="text-align:center;">No records found or Contract not set.</p>';
-                this.leaderboardData = [];
+        // Collision Detection
+        if (this.husky && this.checkCollision(this.husky, blunt)) {
+
+            const result = blunt.hit();
+            if (!result.hit) continue; // Cooldown active, ignore collision
+
+            if (!result.destroyed) {
+                // Armored Clink - Bounce husky
+                this.husky.dx *= -0.8;
+                this.husky.dy *= -0.8;
+
+                this.shotHit = true; // Keep combo alive on armor hit!
+
+                this.audio.clink(); // PLAY CLINK
+                this.particles.spawnFloatingText(blunt.x, blunt.y, "CLINK!", '#aaa');
+                this.particles.spawnExplosion(blunt.x, blunt.y, '#ccc');
             } else {
-                // Sort just in case? Contract is sorted, but safe to ensure.
-                // Contract returns high->low, so we are good.
+                this.blunts.splice(i, 1);
 
-                // Add Ranks
-                data = data.map((item, index) => ({ ...item, rank: index + 1 }));
+                // Track Hit for Combo
+                this.shotHit = true;
+                this.combo++;
 
-                this.leaderboardData = data;
-                this.leaderboardPage = 0;
-                this.renderLeaderboard();
-            }
+                // Linear Multiplier (1 hit = 1x, 2 hits = 2x, etc.)
+                // Minimum 1x
+                this.multiplier = Math.min(5, Math.max(1, this.combo));
 
-        } catch (err) {
-            console.error("Failed to load leaderboard", err);
-            this.leaderboardRows.innerHTML = '<p>Failed to load data.</p>';
-        }
-    }
+                // Score based on Blunt Value
+                // Total Multiplier = Combo * Round
+                const totalMultiplier = this.multiplier * this.round;
 
-    renderLeaderboard() {
-        const start = this.leaderboardPage * this.itemsPerPage;
-        const end = start + this.itemsPerPage;
-        const pageData = this.leaderboardData.slice(start, end);
+                const points = result.score * totalMultiplier;
+                this.updateScore(points);
 
-        this.leaderboardRows.innerHTML = '';
 
-        if (pageData.length === 0 && this.leaderboardPage > 0) {
-            // Safety fallback
-            this.changeLeaderboardPage(-1);
-            return;
-        }
-
-        pageData.forEach(entry => {
-            let displayName = entry.name;
-            if (displayName.length > 12) {
-                // Formatting like wallet: 0x1234...5678
-                if (displayName.startsWith('0x')) {
-                    displayName = `${displayName.substring(0, 6)}...${displayName.substring(displayName.length - 4)}`;
+                // Trigger Visuals
+                if (blunt.type === 'gold') {
+                    this.audio.goldHit();
                 } else {
-                    displayName = displayName.substring(0, 10) + '...';
+                    this.audio.hit(); // PLAY CRUNCH
+                }
+                this.particles.spawnExplosion(blunt.x, blunt.y, blunt.type === 'gold' ? '#FFD700' : '#8b4513');
+
+                let text = `+${points}`;
+                this.particles.spawnFloatingText(blunt.x, blunt.y, text, blunt.type === 'gold' ? '#FFD700' : '#fff');
+
+                // Show multiplier details if significant (Separate Line)
+                // Show multiplier details if significant (Separate Line)
+                if (this.multiplier > 1) {
+                    const multText = `x${this.multiplier}`;
+                    this.particles.spawnFloatingText(blunt.x, blunt.y + 20, multText, '#9d00ff');
+                }
+                this.triggerShake(10); // Shake for 10 frames
+
+                // Round Progression
+                this.hitsInRound++;
+
+                // Update hit markers visually
+                this.hits = this.hitsInRound;
+                this.updateHitMarkers();
+
+                if (this.hitsInRound >= 10) {
+                    this.advanceRound();
                 }
             }
 
-            const row = document.createElement('div');
-            row.className = 'leaderboard-row';
-            row.innerHTML = `<span>${entry.rank}</span><span>${displayName}</span><span>${entry.score}</span>`;
-            this.leaderboardRows.appendChild(row);
-        });
+            continue;
+        }
 
-        // Update Buttons
-        if (this.prevPageBtn) this.prevPageBtn.disabled = this.leaderboardPage === 0;
-        if (this.nextPageBtn) this.nextPageBtn.disabled = end >= this.leaderboardData.length;
+        // Remove if expired
+        if (blunt.isExpired(timestamp)) {
+            this.blunts.splice(i, 1);
+        }
     }
 
-    changeLeaderboardPage(delta) {
-        const newPage = this.leaderboardPage + delta;
-        if (newPage < 0) return;
+    requestAnimationFrame(this.loop);
+}
 
-        // Check upper limit
-        const maxPages = Math.ceil(this.leaderboardData.length / this.itemsPerPage);
-        if (newPage >= maxPages) return;
+spawnBlunt() {
+    const x = Math.random() * (this.width - 100) + 50;
 
-        this.leaderboardPage = newPage;
-        this.renderLeaderboard();
+    // Dynamic Spawn Range
+    // Keep blunts strictly above the sling (which is at height - 90)
+    const topLimit = 50; // Clear top header
+    const bottomLimit = this.height - 150; // Keep well above sling (safe zone for amplitude)
+    const spawnRange = Math.max(30, bottomLimit - topLimit);
+
+    const y = Math.random() * spawnRange + topLimit;
+    this.blunts.push(new Blunt(this, x, y, this.bluntLifeTime, this.speedMultiplier));
+}
+
+checkCollision(husky, blunt) {
+    // 1. Fast Distance Check (Bounding Circle) to filter obvious misses
+    // Husky radius ~25, Blunt ~25. Max possible visual size ~35-40.
+    // We use a generous threshold (80px sum) to ensure we don't filter out valid squash/stretch hits.
+    const dx = husky.x - blunt.x;
+    const dy = husky.y - blunt.y;
+    const distSq = dx * dx + dy * dy;
+    const threshold = 80;
+    if (distSq > threshold * threshold) return false;
+
+    // 2. Pixel-Perfect Check
+    const ctx = this.collisionCtx;
+    const canvas = this.collisionCanvas;
+
+    // Set canvas size to the bounding area of interaction (sufficiently large)
+    canvas.width = 150;
+    canvas.height = 150;
+
+    ctx.clearRect(0, 0, 150, 150);
+
+    // Center the operation in the canvas
+    // We want (husky.x, husky.y) and (blunt.x, blunt.y) to map to near the center (75, 75).
+    // Midpoint of the two objects
+    const midX = (husky.x + blunt.x) / 2;
+    const midY = (husky.y + blunt.y) / 2;
+
+    ctx.save();
+    ctx.translate(75 - midX, 75 - midY);
+
+    // A. Draw Husky (Destination)
+    husky.draw(ctx);
+
+    // B. Draw Blunt (Source-In)
+    ctx.globalCompositeOperation = 'source-in';
+
+    // We call the blunt's sprite directly to avoid GCO issues from the blunt.draw() method
+    // Blunt.draw uses size 60, 60.
+    blunt.sprite.draw(ctx, blunt.x, blunt.y, 60, 60, 0);
+
+    ctx.restore();
+
+    // 3. Scan for overlapping pixels
+    // We only need to scan the center area where they likely overlap
+    const pData = ctx.getImageData(0, 0, 150, 150).data;
+
+    // Loop through alpha channel (every 4th byte)
+    // Optimization: checking every 4th or 8th pixel is usually enough effectively
+    for (let i = 3; i < pData.length; i += 16) { // Check every 4th pixel (i += 4 * 4)
+        if (pData[i] > 0) {
+            console.log(`[PixelHit] Hit at index ${i}, Alpha: ${pData[i]}`);
+            return true;
+        }
     }
 
-    hideLeaderboard() {
-        this.leaderboardScreen.classList.add('hidden');
-        document.getElementById('start-screen').classList.remove('hidden');
+    return false;
+}
+    async showLeaderboard() {
+    this.leaderboardScreen.classList.remove('hidden');
+    document.getElementById('start-screen').classList.add('hidden');
+
+    // Loading State
+    this.leaderboardRows.innerHTML = '<p class="nes-text is-primary" style="text-align:center; margin-top: 20px;">Loading from Dogechain...</p>';
+
+    try {
+        // Fetch from Chain
+        let data = [];
+        if (window.fetchLeaderboard) {
+            data = await window.fetchLeaderboard();
+        }
+
+        // Fallback or empty
+        if (!data || data.length === 0) {
+            this.leaderboardRows.innerHTML = '<p style="text-align:center;">No records found or Contract not set.</p>';
+            this.leaderboardData = [];
+        } else {
+            // Sort just in case? Contract is sorted, but safe to ensure.
+            // Contract returns high->low, so we are good.
+
+            // Add Ranks
+            data = data.map((item, index) => ({ ...item, rank: index + 1 }));
+
+            this.leaderboardData = data;
+            this.leaderboardPage = 0;
+            this.renderLeaderboard();
+        }
+
+    } catch (err) {
+        console.error("Failed to load leaderboard", err);
+        this.leaderboardRows.innerHTML = '<p>Failed to load data.</p>';
+    }
+}
+
+renderLeaderboard() {
+    const start = this.leaderboardPage * this.itemsPerPage;
+    const end = start + this.itemsPerPage;
+    const pageData = this.leaderboardData.slice(start, end);
+
+    this.leaderboardRows.innerHTML = '';
+
+    if (pageData.length === 0 && this.leaderboardPage > 0) {
+        // Safety fallback
+        this.changeLeaderboardPage(-1);
+        return;
     }
 
-    triggerShake(duration) {
-        this.shakeTime = duration;
-    }
+    pageData.forEach(entry => {
+        let displayName = entry.name;
+        if (displayName.length > 12) {
+            // Formatting like wallet: 0x1234...5678
+            if (displayName.startsWith('0x')) {
+                displayName = `${displayName.substring(0, 6)}...${displayName.substring(displayName.length - 4)}`;
+            } else {
+                displayName = displayName.substring(0, 10) + '...';
+            }
+        }
+
+        const row = document.createElement('div');
+        row.className = 'leaderboard-row';
+        row.innerHTML = `<span>${entry.rank}</span><span>${displayName}</span><span>${entry.score}</span>`;
+        this.leaderboardRows.appendChild(row);
+    });
+
+    // Update Buttons
+    if (this.prevPageBtn) this.prevPageBtn.disabled = this.leaderboardPage === 0;
+    if (this.nextPageBtn) this.nextPageBtn.disabled = end >= this.leaderboardData.length;
+}
+
+changeLeaderboardPage(delta) {
+    const newPage = this.leaderboardPage + delta;
+    if (newPage < 0) return;
+
+    // Check upper limit
+    const maxPages = Math.ceil(this.leaderboardData.length / this.itemsPerPage);
+    if (newPage >= maxPages) return;
+
+    this.leaderboardPage = newPage;
+    this.renderLeaderboard();
+}
+
+hideLeaderboard() {
+    this.leaderboardScreen.classList.add('hidden');
+    document.getElementById('start-screen').classList.remove('hidden');
+}
+
+triggerShake(duration) {
+    this.shakeTime = duration;
+}
 }
 
 /**
