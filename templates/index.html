@@ -85,7 +85,7 @@
                     <div id="leaderboard-list">
                         <!-- JS Populates this -->
                         <div class="leaderboard-header">
-                            <span>RANK</span><span>NAME</span><span>SCORE</span>
+                            <span>#</span><span>NAME</span><span>SCORE</span>
                         </div>
                         <div id="leaderboard-rows"></div>
                     </div>
@@ -100,8 +100,19 @@
                 <div id="game-over-screen" class="overlay hidden">
                     <h1 class="title">GAME OVER</h1>
                     <p class="subtitle">SCORE: <span id="final-score">0</span></p>
-                    <button id="restart-btn" class="btn-primary">TRY AGAIN</button>
-                    <button id="exit-btn" class="btn-secondary" style="margin-top: 15px;">EXIT</button>
+
+                    <div id="submit-score-container" class="hidden">
+                        <p id="submit-status-text"
+                            style="font-size: 0.8rem; margin-bottom: 15px; color: #83d313; display: none;">NEW HIGH
+                            SCORE!</p>
+                        <button id="submit-score-btn" class="btn-primary">SUBMIT TO CHAIN</button>
+                        <button id="skip-submit-btn" class="btn-secondary" style="margin-top: 10px;">SKIP</button>
+                    </div>
+
+                    <div id="game-over-menu" class="hidden">
+                        <button id="restart-btn" class="btn-primary">TRY AGAIN</button>
+                        <button id="exit-btn" class="btn-secondary" style="margin-top: 15px;">EXIT</button>
+                    </div>
                 </div>
 
                 <div id="pause-screen" class="overlay hidden">
@@ -132,7 +143,7 @@
         </div>
 
         <div id="footer">
-            Blunt Hunt &copy; 2026 - Dogechain Edition
+            Blunt Hunt &copy; 2026 | <a href="#" style="color: inherit; text-decoration: underline;">Roadmap</a>
         </div>
     </div>
 

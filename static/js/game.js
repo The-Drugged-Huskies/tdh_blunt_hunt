@@ -208,6 +208,23 @@ class Game {
         if (this.slingshot) {
             this.slingshot.updatePosition();
         }
+
+        // DOM elements for Game Over
+        this.submitScoreContainer = document.getElementById('submit-score-container');
+        this.gameOverMenu = document.getElementById('game-over-menu');
+        this.submitScoreBtn = document.getElementById('submit-score-btn');
+        this.skipSubmitBtn = document.getElementById('skip-submit-btn');
+
+        if (this.submitScoreBtn) {
+            this.submitScoreBtn.addEventListener('click', () => {
+                this.submitScoreToChain();
+            });
+        }
+        if (this.skipSubmitBtn) {
+            this.skipSubmitBtn.addEventListener('click', () => {
+                this.showGameOverMenu();
+            });
+        }
     }
 
     start() {
@@ -250,7 +267,7 @@ class Game {
         this.lastSpawnTime = performance.now();
 
         // Timer Logic
-        this.gameDuration = 60; // seconds
+        this.gameDuration = 10; // seconds (TESTING)
         this.startTime = performance.now();
 
         // Start Music
@@ -259,26 +276,74 @@ class Game {
         requestAnimationFrame(this.loop);
     }
 
-    gameOver() {
+    async gameOver() {
         this.isRunning = false;
-        // Clear canvas to hide game elements
         this.ctx.clearRect(0, 0, this.width, this.height);
-
-        // Stop Music
         this.audio.stopMusic();
 
         document.getElementById('final-score').innerText = this.score;
         document.getElementById('game-over-screen').classList.remove('hidden');
 
-        // Hide Header (Leaderboard & Wallet)
+        // Hide both menus initially to prevent flashing
+        this.submitScoreContainer.classList.add('hidden');
+        this.gameOverMenu.classList.add('hidden');
+
+        // Hide Header
         document.getElementById('nes-header').style.visibility = 'hidden';
 
-        // Swap Back (logic kept for restart/exit consistency)
+        // Check Eligibility for Leaderboard
+        const wallet = window.getCurrentWallet ? window.getCurrentWallet() : null;
+
+        console.log("GameOver Debug: Score", this.score, "Wallet", wallet);
+
+        if (wallet) {
+            // Show Submit UI Immediately
+            this.submitScoreContainer.classList.remove('hidden');
+            this.gameOverMenu.classList.add('hidden');
+
+            // Async Check for Top Score Message
+            const statusText = document.getElementById('submit-status-text');
+            if (statusText) statusText.style.display = 'none';
+
+            if (window.checkIsTopScore && this.score > 0) {
+                window.checkIsTopScore(this.score).then(isTop => {
+                    if (isTop && statusText) statusText.style.display = 'block';
+                });
+            }
+        } else {
+            console.log("No wallet connected, showing standard menu.");
+            this.showGameOverMenu();
+        }
+
+        // Swap Back UI
         document.getElementById('timer-display').classList.add('hidden');
         if (this.leaderboardBtn) this.leaderboardBtn.classList.remove('hidden');
+    }
 
-        // Submit Score
-        this.submitScore();
+    showGameOverMenu() {
+        this.submitScoreContainer.classList.add('hidden');
+        this.gameOverMenu.classList.remove('hidden');
+    }
+
+    async submitScoreToChain() {
+        if (!window.submitHighScore) return;
+
+        this.submitScoreBtn.innerText = "SUBMITTING...";
+        this.submitScoreBtn.disabled = true;
+
+        const result = await window.submitHighScore(this.score);
+
+        this.submitScoreBtn.innerText = "SUBMIT TO CHAIN";
+        this.submitScoreBtn.disabled = false;
+
+        if (result.success) {
+            // alert("Score Submitted Successfully!"); // Removed alert
+        } else {
+            // alert("Submission Failed: " + (result.reason || "Unknown Error")); // Removed alert
+        }
+
+        // Always show menu after attempt
+        this.showGameOverMenu();
     }
 
     exitToMenu() {
@@ -296,25 +361,7 @@ class Game {
         this.updateHitMarkers();
     }
 
-    async submitScore() {
-        const wallet = window.getCurrentWallet ? window.getCurrentWallet() : null;
-        const name = wallet ? wallet : "Guest";
 
-        try {
-            const res = await fetch('/submit-score', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name: name, score: this.score })
-            });
-            const data = await res.json();
-            if (data.success) {
-                console.log("Score submitted! Rank:", data.rank);
-                // Optional: Update UI to show submission status
-            }
-        } catch (err) {
-            console.error("Failed to submit score:", err);
-        }
-    }
 
     updateScore(points) {
         this.score += points;
@@ -645,13 +692,31 @@ class Game {
         this.leaderboardScreen.classList.remove('hidden');
         document.getElementById('start-screen').classList.add('hidden');
 
-        try {
-            const res = await fetch('/static/data/leaderboard.json');
-            const data = await res.json();
+        // Loading State
+        this.leaderboardRows.innerHTML = '<p class="nes-text is-primary" style="text-align:center; margin-top: 20px;">Loading from Dogechain...</p>';
 
-            this.leaderboardData = data;
-            this.leaderboardPage = 0;
-            this.renderLeaderboard();
+        try {
+            // Fetch from Chain
+            let data = [];
+            if (window.fetchLeaderboard) {
+                data = await window.fetchLeaderboard();
+            }
+
+            // Fallback or empty
+            if (!data || data.length === 0) {
+                this.leaderboardRows.innerHTML = '<p style="text-align:center;">No records found or Contract not set.</p>';
+                this.leaderboardData = [];
+            } else {
+                // Sort just in case? Contract is sorted, but safe to ensure.
+                // Contract returns high->low, so we are good.
+
+                // Add Ranks
+                data = data.map((item, index) => ({ ...item, rank: index + 1 }));
+
+                this.leaderboardData = data;
+                this.leaderboardPage = 0;
+                this.renderLeaderboard();
+            }
 
         } catch (err) {
             console.error("Failed to load leaderboard", err);

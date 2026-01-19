@@ -577,3 +577,22 @@ canvas {
     cursor: default;
     color: #555;
 }
+
+/* Consistent Button Widths for Game Over Screen */
+#game-over-screen button {
+    display: block;
+    /* Stack them */
+    width: 250px;
+    /* Fixed uniform width */
+    margin: 10px auto;
+    /* Centered with vertical spacing */
+    box-sizing: border-box;
+}
+
+#submit-score-container,
+#game-over-menu {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

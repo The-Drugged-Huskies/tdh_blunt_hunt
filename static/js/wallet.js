@@ -184,3 +184,111 @@ window.addEventListener('DOMContentLoaded', () => {
     initWallet();
     checkConnection();
 });
+
+// --- Leaderboard Integration ---
+
+// Placeholder - User must update this after deployment!
+const LEADERBOARD_CONTRACT_ADDRESS = "0x4e3B6fd8A68074Ee0Ba5f036288CE22d25285eFE";
+
+const LEADERBOARD_ABI = [
+    "function submitScore(uint256 _score) external",
+    "function getLeaderboard() external view returns (tuple(address player, uint256 score, uint256 timestamp)[])",
+    "function getLowestQualifyingScore() external view returns (uint256)"
+];
+
+window.getLeaderboardContract = () => {
+    if (!currentAccount) return null;
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const signer = provider.getSigner();
+    return new ethers.Contract(LEADERBOARD_CONTRACT_ADDRESS, LEADERBOARD_ABI, signer);
+};
+
+// Read-only provider for fetching leaderboard without wallet connection (optional, if we want public view)
+// But for now we use the connected provider or a public RPC if disconnected.
+window.getPublicLeaderboardContract = () => {
+    const rpcUrl = 'https://rpc.dogechain.dog';
+    const provider = new ethers.providers.JsonRpcProvider(rpcUrl, { name: 'dogechain', chainId: 2000 });
+    return new ethers.Contract(LEADERBOARD_CONTRACT_ADDRESS, LEADERBOARD_ABI, provider);
+}
+
+window.fetchLeaderboard = async () => {
+    try {
+        const contract = window.getPublicLeaderboardContract();
+        // Check if address is set
+        if (LEADERBOARD_CONTRACT_ADDRESS === "0x0000000000000000000000000000000000000000") {
+            console.warn("Leaderboard Contract Address not set!");
+            return [];
+        }
+        const data = await contract.getLeaderboard();
+        // Format data
+        return data.map(item => ({
+            name: item.player,
+            score: item.score.toNumber(), // score is uint256, but game max score fits in JS number
+            timestamp: item.timestamp.toNumber()
+        }));
+    } catch (err) {
+        console.error("Error fetching leaderboard:", err);
+        return [];
+    }
+};
+
+window.submitHighScore = async (score) => {
+    try {
+        const contract = window.getLeaderboardContract();
+        if (!contract) throw new Error("Wallet not connected");
+
+        // Verify if worth submitting (save gas)
+        // Note: fetchLeaderboard returns sorted, so we can just check local data or call contract
+        const lowest = await contract.getLowestQualifyingScore();
+
+        if (score <= lowest.toNumber()) {
+            console.log("Score too low to qualify for Top 100.");
+            return { success: false, reason: 'Score too low' };
+        }
+
+        const tx = await contract.submitScore(score);
+        console.log("Transaction sent:", tx.hash);
+        await tx.wait();
+        console.log("Score submitted successfully!");
+        return { success: true, hash: tx.hash };
+    } catch (err) {
+        console.error("Error submitting score:", err);
+        return { success: false, reason: err.message };
+    }
+};
+
+window.checkLeaderboardEligibility = async (score) => {
+    try {
+        console.log("Checking eligibility for score:", score);
+        // Use public provider to check without needing wallet connected yet
+        const contract = window.getPublicLeaderboardContract();
+        if (LEADERBOARD_CONTRACT_ADDRESS === "0x0000000000000000000000000000000000000000") {
+            console.log("Contract address not set");
+            return false;
+        }
+
+        const lowest = await contract.getLowestQualifyingScore();
+        console.log("Lowest qualifying score:", lowest.toNumber());
+        return score > lowest.toNumber();
+    } catch (err) {
+        console.error("Error checking eligibility:", err);
+        return false;
+    }
+};
+
+window.checkIsTopScore = async (score) => {
+    try {
+        const contract = window.getPublicLeaderboardContract();
+        if (LEADERBOARD_CONTRACT_ADDRESS === "0x0000000000000000000000000000000000000000") return true;
+
+        const data = await contract.getLeaderboard();
+
+        if (data.length === 0) return true;
+
+        const topScore = data[0].score.toNumber();
+        return score > topScore;
+    } catch (e) {
+        console.warn("Error checking top score:", e);
+        return false;
+    }
+};
