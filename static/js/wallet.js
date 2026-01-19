@@ -270,7 +270,7 @@ window.checkAndTriggerPayout = async () => {
             const lb = await contract.getLeaderboard();
             let msg = "Round ended! ";
             if (lb.length > 0 && pot.gt(0)) {
-                msg += "Click OK to distribute the Prize Pool and restart the timer.";
+                msg += "Want to be friendly and click OK to distribute the Prize Pool and restart the timer?";
             } else {
                 msg += "Click OK to reset the timer (No winners).";
             }
