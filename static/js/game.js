@@ -276,6 +276,7 @@ class Game {
         // ALWAYS Force Payment (Ticket System)
         if (window.payEntryFee) {
             this.startBtn.disabled = true;
+            if (this.restartBtn) this.restartBtn.disabled = true;
 
             try {
                 // Trigger Payment
@@ -285,6 +286,7 @@ class Game {
                     // Payment Failed or Cancelled
                     // this.startBtn.innerText = "PAY 1 DOGE"; // No change needed
                     this.startBtn.disabled = false;
+                    if (this.restartBtn) this.restartBtn.disabled = false;
                     return; // Stop here
                 }
 
@@ -294,6 +296,7 @@ class Game {
                 console.error("Payment Error:", e);
                 // this.startBtn.innerText = "ERROR";
                 this.startBtn.disabled = false;
+                if (this.restartBtn) this.restartBtn.disabled = false;
                 return;
             }
         }
@@ -426,6 +429,7 @@ class Game {
 
         // Reset Start Button State (just in case)
         if (this.startBtn) this.startBtn.disabled = false;
+        if (this.restartBtn) this.restartBtn.disabled = false;
 
         // Reset State (optional but good for clean start)
         this.score = 0;
