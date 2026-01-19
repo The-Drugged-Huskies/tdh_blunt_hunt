@@ -290,6 +290,13 @@ canvas {
     border-color: #83d313;
 }
 
+.btn-primary:disabled {
+    background: #555;
+    color: #888;
+    border-color: #555;
+    cursor: not-allowed;
+}
+
 .btn-secondary {
     background: #000;
     border: 4px solid #fff;
