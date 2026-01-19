@@ -42,6 +42,7 @@ Extend your run!
 
 - **Desktop**: Click and drag the slingshot to aim. Release to fire.
 - **Mobile**: Touch and drag to aim. Release to fire.
+- **Pause**: Click the **Wallet Address** button (top right) to pause/resume.
 
 ---
 

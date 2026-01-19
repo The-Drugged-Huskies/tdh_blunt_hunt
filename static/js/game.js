@@ -259,8 +259,13 @@ class Game {
             });
         }
         if (this.skipSubmitBtn) {
-            this.skipSubmitBtn.addEventListener('click', () => {
-                this.showGameOverMenu();
+            this.skipSubmitBtn.addEventListener('click', async () => {
+                if (window.showCustomModal) {
+                    const confirmed = await window.showCustomModal("Are you sure? You will lose this score.", true);
+                    if (confirmed) this.showGameOverMenu();
+                } else {
+                    this.showGameOverMenu();
+                }
             });
         }
     }

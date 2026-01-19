@@ -37,6 +37,12 @@ This document contains internal development notes, deployment instructions, and 
 - **Time Bonus**: Adds **5 seconds** to `this.gameDuration`.
   - *Visual*: Injects a temporary DOM element into `#header-left` for the "+5 SEC" green text.
 
+### Pause Feature (`game.js`)
+
+- **Trigger**: Toggled by clicking the wallet address button in the top right corner.
+- **Mechanics**: Sets `this.paused` flag. Stops `update()` loop but keeps `draw()` loop running for a static frame.
+- **Visuals**: Displays a white "PAUSED" overlay in the center of the screen.
+
 ## 🎵 Audio System (`audio.js`)
 
 - **Procedural Generation**: Uses Web Audio API to generate Dub Reggae-style music on the fly.
