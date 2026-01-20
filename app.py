@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 import json
 import os
 
@@ -9,6 +9,14 @@ LEADERBOARD_FILE = os.path.join(app.static_folder, 'data', 'leaderboard.json')
 @app.route('/')
 def index():
     return render_template('index.html')
+
+@app.route('/withdraw')
+def withdraw():
+    return send_from_directory('static', 'withdraw.html')
+
+@app.route('/deploy')
+def deploy():
+    return send_from_directory('static', 'deploy.html')
 
 @app.route('/submit-score', methods=['POST'])
 def submit_score():
