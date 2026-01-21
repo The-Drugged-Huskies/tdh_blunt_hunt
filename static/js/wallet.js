@@ -136,6 +136,14 @@ function updateUI(account) {
 
         // Payout Check: Trigger immediately if round ended
         // The Start Button will be activated inside checkAndTriggerPayout()
+
+        // Ensure buttons are disabled initially
+        if (startConnectBtn) startConnectBtn.classList.add('hidden');
+        if (startBtn) {
+            startBtn.classList.remove('hidden');
+            startBtn.disabled = true;
+        }
+
         fetchBalance(account);
         window.checkAndTriggerPayout();
     } else {
@@ -145,8 +153,14 @@ function updateUI(account) {
         if (walletPopup) walletPopup.classList.add('hidden'); // Ensure popup is closed
 
         // Start Screen Logic
-        if (startConnectBtn) startConnectBtn.classList.remove('hidden');
-        if (startBtn) startBtn.classList.add('hidden');
+        if (startConnectBtn) {
+            startConnectBtn.classList.remove('hidden');
+            startConnectBtn.disabled = true; // Disable until payout check
+        }
+        if (startBtn) {
+            startBtn.classList.add('hidden');
+            startBtn.disabled = true;
+        }
     }
 }
 
@@ -260,8 +274,8 @@ window.getLeaderboardContract = () => {
 
 // Helper to activate the green start button
 function activateStartButton() {
-    if (startConnectBtn) startConnectBtn.classList.add('hidden');
-    if (startBtn) startBtn.classList.remove('hidden');
+    if (startConnectBtn) startConnectBtn.disabled = false;
+    if (startBtn) startBtn.disabled = false;
 }
 
 window.checkAndTriggerPayout = async () => {
