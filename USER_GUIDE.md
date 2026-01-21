@@ -146,3 +146,13 @@ All of these actions happen **simultaneously** in a single transaction:
 4. **Popup**: "Round Ended". You click OK.
 5. **Transaction**: The 500 DOGE is sent to the winner. The board is now empty.
 6. **10:44 AM**: New round begins! Timer counts down to 11:42 AM.
+
+### 5. FAQ Modal
+
+- Accessible via the **"faq"** link in the footer.
+- Explains the Pot mechanics: 75% to Pot, Winner takes all (Rank #1), resets on payout.
+
+### 6. UX Improvements
+
+- **Start Button**: Automatically disabled until the system verifies the payout status.
+- **Seamless Reset**: Confirming a payout resets the UI and Pot *without* reloading the page.
