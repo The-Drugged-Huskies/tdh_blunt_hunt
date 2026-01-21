@@ -302,8 +302,11 @@ window.checkAndTriggerPayout = async () => {
                     console.log("Distribute TX:", tx.hash);
                     await window.showCustomModal("Transaction Sent! Waiting for confirmation...");
                     await tx.wait();
-                    await window.showCustomModal("Round Reset! Page will reload.");
-                    window.location.reload();
+                    await window.showCustomModal("Round Reset!");
+                    activateStartButton();
+                    if (window.game) {
+                        window.game.updatePotDisplay();
+                    }
                 } catch (err) {
                     console.error("Payout failed:", err);
                     await window.showCustomModal("Payout failed or cancelled.");

@@ -215,32 +215,32 @@ class Game {
     }
 
     async initPotPolling() {
-        const updatePot = async () => {
-            if (window.fetchPotInfo) {
-                const info = await window.fetchPotInfo();
-                if (info) {
-                    const potDisplay = document.getElementById('pot-display');
-                    const potTimer = document.getElementById('pot-timer');
+        // Initial call
+        this.updatePotDisplay();
+        // Poll every 10s
+        setInterval(() => this.updatePotDisplay(), 10000);
+    }
 
-                    if (potDisplay) {
-                        potDisplay.innerText = `POT: ${info.pot}`;
-                        potDisplay.classList.remove('hidden');
-                    }
-                    if (potTimer) {
-                        const timeLeft = Math.max(0, info.endTime - Date.now());
-                        const mins = Math.floor(timeLeft / 60000);
-                        const secs = Math.floor((timeLeft % 60000) / 1000);
-                        potTimer.innerText = `PAYOUT IN: ${mins}:${secs < 10 ? '0' : ''}${secs}`;
-                        potTimer.classList.remove('hidden');
-                    }
+    async updatePotDisplay() {
+        if (window.fetchPotInfo) {
+            const info = await window.fetchPotInfo();
+            if (info) {
+                const potDisplay = document.getElementById('pot-display');
+                const potTimer = document.getElementById('pot-timer');
+
+                if (potDisplay) {
+                    potDisplay.innerText = `POT: ${info.pot}`;
+                    potDisplay.classList.remove('hidden');
+                }
+                if (potTimer) {
+                    const timeLeft = Math.max(0, info.endTime - Date.now());
+                    const mins = Math.floor(timeLeft / 60000);
+                    const secs = Math.floor((timeLeft % 60000) / 1000);
+                    potTimer.innerText = `NEXT PAYOUT: ${mins}:${secs < 10 ? '0' : ''}${secs}`;
+                    potTimer.classList.remove('hidden');
                 }
             }
-        };
-        // Initial call
-        updatePot();
-        // Poll every 10s
-        setInterval(updatePot, 10000);
-
+        }
     }
 
     resize() {
@@ -351,7 +351,7 @@ class Game {
         this.lastSpawnTime = performance.now();
 
         // Timer Logic
-        this.gameDuration = 15; // seconds
+        this.gameDuration = 60; // seconds
         this.startTime = performance.now();
 
         // Start Music
