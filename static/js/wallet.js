@@ -24,7 +24,7 @@ let currentAccount = null;
 // Expose for game.js
 window.getCurrentWallet = () => currentAccount;
 
-window.showCustomModal = (message, isCheck = false) => {
+window.showCustomModal = (message, isCheck = false, titleText = null) => {
     return new Promise((resolve) => {
         const modal = document.getElementById('custom-modal');
         const title = document.getElementById('modal-title');
@@ -40,8 +40,13 @@ window.showCustomModal = (message, isCheck = false) => {
         }
 
         msg.innerText = message;
-        title.innerText = isCheck ? "CONFIRM" : "NOTICE";
-        title.style.color = isCheck ? '#fc9838' : '#83d313'; // Orange for confirm, Green for notice
+        if (titleText) {
+            title.innerText = titleText;
+            title.style.color = '#fc9838'; // Defaulting to orange/gold for custom titles
+        } else {
+            title.innerText = isCheck ? "CONFIRM" : "NOTICE";
+            title.style.color = isCheck ? '#fc9838' : '#83d313'; // Orange for confirm, Green for notice
+        }
 
         // Reset listeners by cloning
         const newOk = okBtn.cloneNode(true);
@@ -272,9 +277,9 @@ window.checkAndTriggerPayout = async () => {
             const lb = await contract.getLeaderboard();
             let msg = "Round ended! ";
             if (lb.length > 0 && pot.gt(0)) {
-                msg += "Want to be friendly and click OK to distribute the Prize Pool and restart the timer?";
+                msg += "Be friendly and click OK to distribute the Prize Pool and restart the tournament? You will join a monthly raffle as thank you!";
             } else {
-                msg += "Click OK to reset the timer (No winners).";
+                msg += "No winners! Be friendly and click OK to reset the timer and restart the tournament?";
             }
 
             if (await window.showCustomModal(msg, true)) {

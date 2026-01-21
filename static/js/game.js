@@ -195,6 +195,23 @@ class Game {
 
         // Pot Polling
         this.initPotPolling();
+
+        // FAQ Modal
+        const faqLink = document.getElementById('faq-link');
+        if (faqLink) {
+            faqLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                if (window.showCustomModal) {
+                    const msg = "HOW THE POT WORKS:\n\n" +
+                        "1. 75% of every Game fee goes to the Pot.\n" +
+                        "2. Pot builds up until the timer ends.\n" +
+                        "3. When the timer hits 00:00, the next player to see the 'Round Ended' popup triggers the payout.\n" +
+                        "4. The Pot is distributed to the winner (#1 on the leaderboard).\n" +
+                        "5. The Pot resets and a new round begins!";
+                    window.showCustomModal(msg, false, "FAQ");
+                }
+            });
+        }
     }
 
     async initPotPolling() {
