@@ -1,5 +1,5 @@
 /**
- * Game Class
+ * Game Class v0.69
  * Manages the main game loop, state, and rendering context.
  * Coordinates interaction between the Slingshot, Husky, and Blunts.
  */

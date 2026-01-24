@@ -1,4 +1,4 @@
-# ☁️ Vercel Deployment Guide
+# ☁️ Vercel Deployment Guide v0.69
 
 Deploying your Python/Flask backend and frontend to Vercel is easy.
 
@@ -75,5 +75,6 @@ vercel --prod
 
 ## Troubleshooting
 
-* **500 Error on Sign**: Check Vercel Logs. usually means `SIGNER_PRIVATE_KEY` is missing or invalid.
+- **500 Error on Sign**: Check Vercel Logs. usually means `SIGNER_PRIVATE_KEY` is missing or invalid.
+
 - **"Signer not configured"**: You forgot Step 5.

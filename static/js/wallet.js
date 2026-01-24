@@ -1,9 +1,6 @@
 /**
-
- * Wallet Interaction Module
-
+ * Wallet Interaction Module v0.69
  * Handles connection to Dogechain, contract interaction, and UI updates.
-
  */
 
 

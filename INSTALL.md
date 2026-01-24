@@ -1,4 +1,4 @@
-# 🚀 Installation Guide: TDH Blunt Hunt (Secured)
+# 🚀 Installation Guide: TDH Blunt Hunt v0.69 (Secured)
 
 Your game is now upgraded with **Anti-Cheat Security** (Backend Signatures).
 Follow these steps to deploy and launch.
