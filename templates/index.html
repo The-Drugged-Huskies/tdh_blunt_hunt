@@ -14,6 +14,36 @@
     <!-- Dependencies -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"
         type="application/javascript"></script>
+
+    <!-- Zoom Prevention -->
+    <script>
+        // Block Ctrl+Scroll (Zoom)
+        document.addEventListener('wheel', function (e) {
+            if (e.ctrlKey) {
+                e.preventDefault();
+            }
+        }, { passive: false });
+
+        // Block Key Commands (Ctrl +/-, Ctrl 0)
+        document.addEventListener('keydown', function (e) {
+            if (e.ctrlKey && (
+                e.key === '=' ||
+                e.key === '-' ||
+                e.key === '+' ||
+                e.key === '0'
+            )) {
+                e.preventDefault();
+            }
+        });
+
+        // Block iOS Safari internal pinch-zoom
+        document.addEventListener('gesturestart', function (e) {
+            e.preventDefault();
+        });
+        document.addEventListener('gesturechange', function (e) {
+            e.preventDefault();
+        }); 
+    </script>
 </head>
 
 <body>
