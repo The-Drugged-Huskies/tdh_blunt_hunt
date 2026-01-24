@@ -99,9 +99,11 @@ def sign_score():
     Signs a score for the blockchain leaderboard.
     """
     try:
+        # Tries to load from environment variable first
         private_key = os.getenv('SIGNER_PRIVATE_KEY')
         
-        # Testing override: Try env.json
+        # Fallback to env.json if strict env var is missing and file exists
+        # (Useful for local dev if .env is not used)
         if not private_key and os.path.exists('env.json'):
             try:
                 with open('env.json', 'r') as f:
@@ -111,7 +113,15 @@ def sign_score():
                 pass
 
         if not private_key:
+            print("Error: SIGNER_PRIVATE_KEY not found in env or env.json")
             return jsonify({"success": False, "error": "Signer not configured"}), 500
+            
+        # Clean the key
+        private_key = private_key.strip()
+        if not private_key.startswith("0x"):
+            # If the user forgot 0x, add it? Or let 'eth_account' handle it?
+            # eth_account usually wants 0x for hex strings.
+            private_key = "0x" + private_key
 
         data = request.json
         player = data.get('player')
