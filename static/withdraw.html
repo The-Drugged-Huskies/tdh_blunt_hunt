@@ -163,6 +163,7 @@
             "function forceEndedState() external",
             "function distributePrize() external",
             "function setGameInterval(uint256 _interval) external",
+            "function setHelperAlignment(uint256 _offset) external",
             "function setSignerAddress(address _signer) external",
             "function gameCost() view returns (uint256)",
             "function gameInterval() view returns (uint256)",
@@ -337,10 +338,18 @@
                     nextTeatime += 3600;
                 }
 
+                const interval = await contract.gameInterval();
+                const offset = nextTeatime % interval.toNumber();
+
                 log(`Setting Timer to Next Teatime: ${nextTeatime} (in ${((nextTeatime - now) / 60).toFixed(1)} mins)...`, "success");
+
+                log(`Aligning Schedule (Offset: ${offset})...`, "warn");
+                const tx1 = await contract.setHelperAlignment(offset);
+                await tx1.wait();
+
                 const tx = await contract.setGameEndTime(nextTeatime);
                 await tx.wait();
-                log("Timer Synced!", "success");
+                log("Timer Synced & Aligned!", "success");
             } catch (e) { log("Error: " + e.message, "error"); }
         });
 
@@ -443,9 +452,18 @@
                 const timestamp = Math.floor(target.getTime() / 1000);
 
                 log(`Aligning Next End Time to: ${target.toUTCString()} (TS: ${timestamp})...`, "success");
-                const tx = await contract.setGameEndTime(timestamp);
-                await tx.wait();
-                log("End Time Aligned (UTC)!", "success");
+
+                // Calculate Alignment Offset
+                const interval = await contract.gameInterval();
+                const offset = timestamp % interval.toNumber();
+
+                log(`Updating Schedule Alignment (Offset: ${offset})...`, "warn");
+                const tx1 = await contract.setHelperAlignment(offset);
+                await tx1.wait();
+
+                const tx2 = await contract.setGameEndTime(timestamp);
+                await tx2.wait();
+                log("End Time & Schedule Aligned (UTC)!", "success");
 
             } catch (e) { log("Error: " + e.message, "error"); }
         });

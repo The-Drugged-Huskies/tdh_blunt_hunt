@@ -215,6 +215,7 @@ contract Leaderboard is Ownable {
     }
 
     function recoverFunds() external onlyOwner {
+        prizePool = 0; // Reset internal counter to match empty wallet
         (bool success, ) = payable(owner()).call{value: address(this).balance}("");
         require(success, "Transfer failed");
     }
