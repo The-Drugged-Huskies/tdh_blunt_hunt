@@ -117,14 +117,14 @@ The Smart Contract automatically calculates the deadline.
 
 Because the blockchain cannot "wake up" by itself, the payout needs a nudge. This happens in two reliable ways:
 
-**A. The "Polite" Trigger (Primary)**
+#### A. The "Polite" Trigger (Primary)
 
 - **When**: You (or any user) connect your wallet to the site.
 - **What Happens**: The site checks if the time is past XX:42.
 - **Action**: A popup appears: *"Round Ended! Click OK to distribute prize."*
 - **Result**: You sign the transaction -> Winner gets paid -> Leaderboard Wipes -> Timer Resets.
 
-**B. The "Forceful" Trigger (Backup)**
+#### B. The "Forceful" Trigger (Backup)
 
 - **When**: Only if nobody connects via the site, but someone manages to send a "Pay 1 DOGE" transaction directly.
 - **Action**: The contract prevents the new game from starting until the old business is settled.
