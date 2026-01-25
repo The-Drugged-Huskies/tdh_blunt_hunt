@@ -528,7 +528,6 @@ class Game {
         document.getElementById('score').innerText = scoreStr;
 
         if (points > 0) {
-            // this.hits++; removed, handled in collision
             // this.updateHitMarkers();
         }
 
@@ -597,12 +596,8 @@ class Game {
 
         if (this.isPaused) {
             if (this.pauseScreen) this.pauseScreen.classList.remove('hidden');
-            // Optional: Suspend audio
-            // if (this.audio.ctx.state === 'running') this.audio.ctx.suspend();
         } else {
             if (this.pauseScreen) this.pauseScreen.classList.add('hidden');
-            // Optional: Resume audio
-            // if (this.audio.ctx.state === 'suspended') this.audio.ctx.resume();
 
             // Fix delta time spike to prevent game jump
             this.lastTime = performance.now();
@@ -661,10 +656,6 @@ class Game {
         } else {
             this.gameContainer.style.transform = 'none';
         }
-
-        // Debug safe area (optional)
-        // this.ctx.strokeStyle = 'red';
-        // this.ctx.strokeRect(0, 0, this.width, this.height - this.hudHeight);
 
         this.updateTimer(timestamp);
         if (!this.isRunning) return; // Stop drawing if game ended in updateTimer

@@ -4,6 +4,16 @@
 
 ---
 
+## 📚 Documentation
+
+- [**Install Guide**](docs/Install.md) - How to setup and run locally.
+- [**User Guide**](docs/UserGuide.md) - Detailed gameplay instructions.
+- [**Admin Guide**](docs/Admin.md) - Managing the contract and tournament.
+- [**Deployment (Vercel)**](docs/Vercel.md) - Hosting the game.
+- [**Music Engine**](docs/Music.md) - How the procedural audio works.
+
+---
+
 ## 🎮 How to Play
 
 **Objective**: Score as many points as possible before time runs out!

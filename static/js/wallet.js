@@ -498,7 +498,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // --- Leaderboard Integration ---
 
-// Placeholder - User must update this after deployment!
 // Used from config.js
 const LEADERBOARD_CONTRACT_ADDRESS = GameConfig.LEADERBOARD_CONTRACT_ADDRESS;
 // Initial value from config, but will be updated dynamically
@@ -614,11 +613,7 @@ window.payEntryFee = async () => {
             value: costWei
         });
 
-        // Debug info - kept for transparency during dev/beta
-        console.log(`Payment Sent: ${tx.hash}`);
-
         await tx.wait();
-        console.log("Payment confirmed!");
         return { success: true };
     } catch (err) {
         console.error("Payment failed:", err);
@@ -725,9 +720,7 @@ window.submitHighScore = async (score) => {
 
         // 2. Submit
         const tx = await contract.submitScore(score, signature);
-        console.log("Transaction sent:", tx.hash);
         await tx.wait();
-        console.log("Score submitted successfully!");
         return { success: true, hash: tx.hash };
     } catch (err) {
         console.error("Error submitting score:", err);

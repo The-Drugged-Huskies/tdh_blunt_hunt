@@ -9,6 +9,9 @@ const GameConfig = {
     // Default Game Cost (Visual only, contract enforces actual cost)
     GAME_COST_DOGE: "1.0",
 
+    // Game Version
+    GAME_VERSION: "0.75",
+
     // Chain Information
     DOGECHAIN_ID: '0x7D0', // 2000
     RPC_URL: 'https://rpc.dogechain.dog',
