@@ -10,11 +10,14 @@ class AudioManager {
         this.sfxVolume = 1.0;
 
         // Resume AudioContext on first interaction
-        window.addEventListener('click', () => {
+        const resumeAudio = () => {
             if (this.ctx.state === 'suspended') {
                 this.ctx.resume();
             }
-        }, { once: true });
+        };
+        window.addEventListener('click', resumeAudio, { once: true });
+        window.addEventListener('touchstart', resumeAudio, { once: true });
+        window.addEventListener('keydown', resumeAudio, { once: true });
 
         // Master Busses
         this.musicBus = this.ctx.createGain();

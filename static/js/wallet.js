@@ -419,9 +419,11 @@ function initWallet() {
     }
 
     if (startConnectBtn) {
-
         startConnectBtn.addEventListener('click', () => connectWallet());
-
+        startConnectBtn.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            connectWallet();
+        }, { passive: false });
     }
 
     if (disconnectBtn) {

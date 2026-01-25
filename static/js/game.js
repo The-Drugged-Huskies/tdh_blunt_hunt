@@ -95,8 +95,16 @@ class Game {
         this.startBtn = document.getElementById('start-btn');
         this.restartBtn = document.getElementById('restart-btn');
 
-        this.startBtn.addEventListener('click', () => this.start());
-        this.restartBtn.addEventListener('click', () => this.start());
+        const startHandler = (e) => {
+            if (e.type === 'touchstart') e.preventDefault(); // Prevent ghost clicks
+            this.start();
+        };
+
+        this.startBtn.addEventListener('click', startHandler);
+        this.startBtn.addEventListener('touchstart', startHandler, { passive: false });
+
+        this.restartBtn.addEventListener('click', startHandler);
+        this.restartBtn.addEventListener('touchstart', startHandler, { passive: false });
 
         this.exitBtn = document.getElementById('exit-btn');
         if (this.exitBtn) this.exitBtn.addEventListener('click', () => this.exitToMenu());
