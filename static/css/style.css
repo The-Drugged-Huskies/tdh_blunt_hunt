@@ -410,6 +410,38 @@ canvas {
     padding-right: 10px;
 }
 
+/* Reusable Box Style for FAQ/Leaderboard content */
+.leaderboard-box {
+    border: 2px solid #fff;
+    background: #000;
+    /* Ensure opaque background */
+    padding: 10px;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 90%;
+}
+
+.faq-list-item {
+    font-size: 0.6rem;
+    line-height: 1.6;
+    margin-bottom: 8px;
+    color: #ccc;
+    border-bottom: 1px dotted #333;
+    padding-bottom: 5px;
+}
+
+.faq-list-item:last-child {
+    border-bottom: none;
+}
+
+.faq-question {
+    color: #83d313;
+    /* Green Question */
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+
 #footer {
     margin-top: 10px;
     color: #555;
@@ -603,9 +635,9 @@ canvas {
 }
 
 .nav-arrow:disabled {
-    opacity: 0.2;
+    opacity: 0.5;
     cursor: default;
-    color: #555;
+    color: #777;
 }
 
 /* Consistent Button Widths for Game Over Screen */
@@ -631,11 +663,119 @@ canvas {
 .footer-link {
     color: inherit;
     text-decoration: none;
-    opacity: 0.7;
-    transition: opacity 0.2s;
+    opacity: 1;
+    transition: color 0.2s;
 }
 
 .footer-link:hover {
-    opacity: 1;
+    color: #fff;
     text-decoration: underline;
+}
+
+/* FAQ Tabs */
+.faq-tabs {
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+/* FAQ Content Box */
+.faq-content-box::-webkit-scrollbar {
+    width: 6px;
+}
+
+.faq-content-box::-webkit-scrollbar-track {
+    background: #000;
+}
+
+.faq-content-box::-webkit-scrollbar-thumb {
+    background: #fff;
+    border-radius: 3px;
+}
+
+/* FAQ Content */
+.faq-section {
+    font-family: var(--font-nes);
+    font-size: 0.6rem;
+    line-height: 1.8;
+}
+
+/* Reusable Box Style for FAQ/Leaderboard content */
+.leaderboard-box {
+    border: 2px solid #fff;
+    background: #000;
+    /* Ensure opaque background */
+    padding: 10px;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 90%;
+    font-family: var(--font-nes);
+    /* Force Font */
+}
+
+.faq-list-item {
+    font-family: var(--font-nes);
+    /* Double Force Font */
+    font-size: 0.55rem;
+    /* Smaller to fit */
+    line-height: 1.6;
+    margin-bottom: 8px;
+    color: #ccc;
+    border-bottom: 1px dotted #333;
+    padding-bottom: 5px;
+}
+
+.faq-list-item:last-child {
+    border-bottom: none;
+}
+
+.faq-question {
+    color: #83d313;
+    /* Green Question */
+    margin-bottom: 4px;
+    text-transform: uppercase;
+}
+
+/* Tabs rely on btn-secondary, we just style active state and hover */
+.faq-tab {
+    flex: 1;
+    /* Scale to fill space */
+    margin: 0;
+    padding: 10px 0;
+    /* Top/Bottom padding only, side handled by flex and center text */
+    font-size: 0.8rem;
+    /* Larger font since we only have 3 items now */
+    min-width: 0;
+    /* Allow shrink */
+    text-align: center;
+    white-space: nowrap;
+    /* Prevent wrap */
+    overflow: hidden;
+    /* safety */
+}
+
+.faq-tab.active-tab {
+    background: #209cee !important;
+    /* Leaderboard Blue */
+    color: #fff !important;
+    border-color: #fff !important;
+}
+
+/* Specific overwrite to match Leaderboard Blue */
+.faq-tab.active-tab {
+    background: #209cee !important;
+    /* Leaderboard Blue */
+    color: #fff !important;
+    border-color: #fff !important;
+}
+
+/* Global Hidden Helper - strengthened */
+.hidden {
+    display: none !important;
+}
+
+.faq-content.hidden {
+    display: none !important;
 }

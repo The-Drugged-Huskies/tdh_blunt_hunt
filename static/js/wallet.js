@@ -653,10 +653,11 @@ window.fetchLeaderboard = async () => {
             return [];
         }
         const data = await contract.getLeaderboard();
-        return data.map(item => ({
+        return data.map((item, index) => ({
             name: item.player,
             score: item.score.toNumber(),
-            timestamp: item.timestamp.toNumber()
+            timestamp: item.timestamp.toNumber(),
+            rank: index + 1
         }));
     } catch (err) {
         console.error("Error fetching leaderboard:", err);
@@ -796,6 +797,11 @@ window.fetchAllTimeLeaderboard = async () => {
         });
 
         leaderboard.sort((a, b) => b.score - a.score);
+
+        // Assign Rank
+        leaderboard.forEach((item, index) => {
+            item.rank = index + 1;
+        });
 
         return leaderboard;
     } catch (err) {

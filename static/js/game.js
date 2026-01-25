@@ -216,22 +216,7 @@ class Game {
         // Pot Polling
         this.initPotPolling();
 
-        // FAQ Modal
-        const faqLink = document.getElementById('faq-link');
-        if (faqLink) {
-            faqLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (window.showCustomModal) {
-                    const msg = "HOW THE POT WORKS:\n\n" +
-                        "1. 75% of every Game fee goes to the Pot.\n" +
-                        "2. Pot builds up until the timer ends.\n" +
-                        "3. When the timer hits 00:00, the next player to see the 'Round Ended' popup triggers the payout.\n" +
-                        "4. The Pot is distributed to the winner (#1 on the leaderboard).\n" +
-                        "5. The Pot resets and a new round begins!";
-                    window.showCustomModal(msg, false, "FAQ");
-                }
-            });
-        }
+
     }
 
     async initPotPolling() {
@@ -888,8 +873,6 @@ class Game {
                 data.sort((a, b) => b.score - a.score);
 
                 // Add Ranks
-                data = data.map((item, index) => ({ ...item, rank: index + 1 }));
-
                 this.leaderboardData = data;
                 this.leaderboardPage = 0;
                 this.renderLeaderboard();
@@ -1395,3 +1378,64 @@ class ParticleManager {
         this.texts.forEach(t => t.draw(ctx));
     }
 }
+
+// --- Global UI Listeners (Footer) ---
+document.addEventListener('DOMContentLoaded', () => {
+    // Modal Toggles
+    const faqLink = document.getElementById('faq-link');
+    const faqModal = document.getElementById('faq-modal');
+    const closeFaqBtn = document.getElementById('close-faq-btn');
+
+    // Helper to close all overlays to prevent stacking/ghosting
+    const closeAllModals = () => {
+        const overlays = document.querySelectorAll('.overlay');
+        overlays.forEach(o => {
+            // Don't close the start screen, it should stay underneath if we aren't playing
+            if (o.id !== 'start-screen') {
+                o.classList.add('hidden');
+            }
+        });
+    };
+
+    if (faqLink && faqModal && closeFaqBtn) {
+        faqLink.onclick = (e) => {
+            e.preventDefault();
+            closeAllModals(); // Safe Close
+            faqModal.classList.remove('hidden');
+
+            // Activate Info tab by default
+            const infoTab = document.querySelector('.faq-tab[data-tab="info"]');
+            if (infoTab) infoTab.click();
+        };
+        closeFaqBtn.onclick = () => { faqModal.classList.add('hidden'); };
+    }
+
+    // FAQ Tabs Logic
+    const tabs = document.querySelectorAll('.faq-tab');
+    const sections = document.querySelectorAll('.faq-section');
+
+    tabs.forEach(tab => {
+        tab.onclick = () => {
+            // Reset all tabs
+            tabs.forEach(t => {
+                t.classList.remove('active-tab');
+                t.style.background = ''; // Reset inline styles
+                t.style.color = '';
+            });
+
+            // Activate clicked tab
+            tab.classList.add('active-tab');
+            // Matching Leaderboard Blue
+            tab.style.background = '#209cee';
+            tab.style.color = '#fff';
+
+            // Switch Content
+            sections.forEach(s => s.classList.add('hidden'));
+            const targetId = `faq-${tab.dataset.tab}`; // matches 'info', 'controls', 'payouts'
+            const targetContent = document.getElementById(targetId);
+            if (targetContent) targetContent.classList.remove('hidden');
+        };
+    });
+
+
+});
