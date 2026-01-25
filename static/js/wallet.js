@@ -597,8 +597,21 @@ window.payEntryFee = async () => {
         const contract = window.getLeaderboardContract();
         if (!contract) throw new Error("Wallet not connected");
 
+        // Check Balance First
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+        const balance = await signer.getBalance(); // Wei
+        const costWei = ethers.utils.parseEther(GAME_COST_DOGE); // Wei
+
+        if (balance.lt(costWei)) {
+            const balEth = ethers.utils.formatEther(balance);
+            const msg = `INSUFFICIENT FUNDS!\n\nRequiered: ${GAME_COST_DOGE} DOGE\nYour Balance: ${parseFloat(balEth).toFixed(2)} DOGE\n\nPlease top up your wallet.`;
+            await window.showCustomModal(msg, false); // false = no cancel button (OK only)
+            throw new Error("Insufficient funds");
+        }
+
         const tx = await contract.startGame({
-            value: ethers.utils.parseEther(GAME_COST_DOGE)
+            value: costWei
         });
 
         // Debug info - kept for transparency during dev/beta
