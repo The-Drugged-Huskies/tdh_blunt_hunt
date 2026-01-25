@@ -516,7 +516,7 @@ window.addEventListener('DOMContentLoaded', () => {
 // --- Leaderboard Integration ---
 
 // Placeholder - User must update this after deployment!
-const LEADERBOARD_CONTRACT_ADDRESS = "0x70B4a8F2937835B381534706d7821Cb06E29e9A4";
+const LEADERBOARD_CONTRACT_ADDRESS = "0x2e50E3beEd076d6F72Bf79d05032FE4Af1A2729f";
 const GAME_COST_DOGE = "1.0"; // 1 DOGE
 
 const LEADERBOARD_ABI = [

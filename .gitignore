@@ -58,3 +58,6 @@ static/data/leaderboard.json
 # IDE
 .vscode/
 .idea/
+
+# Scripts
+verify_signer.py

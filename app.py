@@ -102,16 +102,6 @@ def sign_score():
         # Tries to load from environment variable first
         private_key = os.getenv('SIGNER_PRIVATE_KEY')
         
-        # Fallback to env.json if strict env var is missing and file exists
-        # (Useful for local dev if .env is not used)
-        if not private_key and os.path.exists('env.json'):
-            try:
-                with open('env.json', 'r') as f:
-                    config = json.load(f)
-                    private_key = config.get('SIGNER_PRIVATE_KEY')
-            except Exception:
-                pass
-
         if not private_key:
             print("Error: SIGNER_PRIVATE_KEY not found in env or env.json")
             return jsonify({"success": False, "error": "Signer not configured"}), 500

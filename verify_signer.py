@@ -11,12 +11,7 @@ def test_signer():
     private_key = os.getenv('SIGNER_PRIVATE_KEY')
     
     # Fallback logic check similar to app.py
-    if not private_key and os.path.exists('env.json'):
-        import json
-        print("Loading from env.json fallback...")
-        with open('env.json', 'r') as f:
-            data = json.load(f)
-            private_key = data.get('SIGNER_PRIVATE_KEY')
+
 
     if not private_key:
         print("FAIL: No key found in environment or env.json")
@@ -33,7 +28,7 @@ def test_signer():
         # Dummy data
         player = "0x1234567890123456789012345678901234567890"
         score = 123
-        contract = "0x70B4a8F2937835B381534706d7821Cb06E29e9A4"
+        contract = "0x2e50E3beEd076d6F72Bf79d05032FE4Af1A2729f"
         
         # Checksum
         player = Web3.to_checksum_address(player)
