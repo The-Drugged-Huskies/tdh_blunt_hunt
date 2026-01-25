@@ -44,13 +44,13 @@ You need a secondary wallet to sign scores. **Do not use your main wallet.**
 1. Open `static/js/wallet.js`.
     * Find `LEADERBOARD_CONTRACT_ADDRESS`.
     * Paste your **NEW** address.
-2. Open `static/withdraw.html`.
+2. Open `static/admin.html`.
     * Find the input `value="..."` (near line 71).
     * Paste your **NEW** address.
 
 ## 6. Security Setup (Crucial Step!)
 
-1. Go to `http://localhost:5000/withdraw`.
+1. Go to `http://localhost:5000/admin`.
 2. Connect Wallet (Owner).
 3. Scroll to **SECURITY (BACKEND)**.
 4. Paste the **Signer Address** (The Public Address from Step 2).
@@ -68,5 +68,5 @@ You need a secondary wallet to sign scores. **Do not use your main wallet.**
 
 ## 8. Game Admin Config (Optional)
 
-* In `withdraw.html`, set your desired **Duration** (e.g. 24 Hours).
+* In `admin.html`, set your desired **Duration** (e.g. 24 Hours).
 * Set your **Time Alignment** (e.g. 16:20 UTC).

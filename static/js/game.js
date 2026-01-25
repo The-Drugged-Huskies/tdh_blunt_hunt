@@ -130,6 +130,20 @@ class Game {
         if (this.leaderboardBtn) this.leaderboardBtn.addEventListener('click', () => this.showLeaderboard());
         if (this.closeLeaderboardBtn) this.closeLeaderboardBtn.addEventListener('click', () => this.hideLeaderboard());
 
+        // Leaderboard Pagination & Tabs
+        this.itemsPerPage = 10;
+        this.leaderboardPage = 0;
+
+        this.prevPageBtn = document.getElementById('prev-page-btn');
+        this.nextPageBtn = document.getElementById('next-page-btn');
+        if (this.prevPageBtn) this.prevPageBtn.addEventListener('click', () => this.changeLeaderboardPage(-1));
+        if (this.nextPageBtn) this.nextPageBtn.addEventListener('click', () => this.changeLeaderboardPage(1));
+
+        const hourlyBtn = document.getElementById('tab-hourly');
+        const allTimeBtn = document.getElementById('tab-alltime');
+        if (hourlyBtn) hourlyBtn.addEventListener('click', () => this.switchLeaderboardTab('hourly'));
+        if (allTimeBtn) allTimeBtn.addEventListener('click', () => this.switchLeaderboardTab('alltime'));
+
         // Settings Logic
         this.settingsBtn = document.getElementById('settings-btn');
         this.settingsPopup = document.getElementById('settings-popup');
@@ -459,8 +473,27 @@ class Game {
         if (result.success) {
             if (window.showCustomModal) window.showCustomModal("SCORE SUBMITTED SECURELY!", false, "SUCCESS");
         } else {
-            if (window.showCustomModal) window.showCustomModal("SUBMISSION FAILED:\n" + (result.reason || "Unknown Error"), false, "ERROR");
-            console.error("Submission Failed Details:", result);
+            // Smart Error Handling
+            if (result.reason && result.reason.includes("NO_TICKET")) {
+                const payNow = await window.showCustomModal(
+                    "ENTRY TOKEN EXPIRED!\n\nPay 1 DOGE to submit this score?",
+                    true,
+                    "PAYMENT REQUIRED"
+                );
+
+                if (payNow && window.payEntryFee) {
+                    const payResult = await window.payEntryFee();
+                    if (payResult.success) {
+                        // Retry Submission Recursively
+                        return this.submitScoreToChain();
+                    } else {
+                        window.showCustomModal("Payment Failed. Score discarded.", false, "ERROR");
+                    }
+                }
+            } else {
+                if (window.showCustomModal) window.showCustomModal("SUBMISSION FAILED:\n" + (result.reason || "Unknown Error"), false, "ERROR");
+                console.error("Submission Failed Details:", result);
+            }
         }
 
         // Always show menu after attempt
@@ -941,328 +974,7 @@ class Game {
     }
 }
 
-/**
- * Slingshot Class
- * Handles the physics and user interaction for aiming and launching projectiles.
- */
-class Slingshot {
-    /**
-     * @param {Game} game - Reference to the main game instance.
-     */
-    constructor(game) {
-        this.game = game;
-        this.updatePosition();
-        this.isDragging = false;
-        this.dragX = this.x;
-        this.dragY = this.y - 40;
-        this.maxPull = 150;
 
-        // Sprite
-        this.sprite = new Sprite({
-            image: this.game.assets['slingshot']
-        });
-
-        // Husky Sprite for aiming
-        this.huskySprite = new Sprite({
-            image: this.game.assets['husky']
-        });
-
-        this.wobbleStartTime = 0;
-    }
-
-    updatePosition() {
-        this.x = this.game.width / 2;
-        // Position visually on the "grass" which is bottom of screen behind HUD
-        // Since Canvas is now full height (overlaying HUD), we position it lower
-        this.y = this.game.height - 90;
-
-        if (!this.isDragging) {
-            this.dragX = this.x;
-            this.dragY = this.y - 40;
-        }
-    }
-
-    onMouseDown(x, y) {
-        // Scale input coordinates to canvas 320x180
-        const rect = this.game.canvas.getBoundingClientRect();
-        const scaleX = this.game.width / rect.width;
-        const scaleY = this.game.height / rect.height;
-
-        const gameX = (x - rect.left) * scaleX;
-        const gameY = (y - rect.top) * scaleY;
-
-        const dist = Math.hypot(gameX - this.x, gameY - this.y);
-        // Interaction radius increased for easier grabbing (covers the husky position)
-        if (dist < 80) {
-            this.isDragging = true;
-            this.dragX = gameX;
-            this.dragY = gameY;
-        }
-    }
-
-    onMouseMove(x, y) {
-        if (this.isDragging) {
-            const rect = this.game.canvas.getBoundingClientRect();
-            const scaleX = this.game.width / rect.width;
-            const scaleY = this.game.height / rect.height;
-
-            const gameX = (x - rect.left) * scaleX;
-            const gameY = (y - rect.top) * scaleY;
-
-            const dx = gameX - this.x;
-            const dy = gameY - this.y;
-            const dist = Math.hypot(dx, dy);
-
-            if (dist > this.maxPull) {
-                const angle = Math.atan2(dy, dx);
-                this.dragX = this.x + Math.cos(angle) * this.maxPull;
-                this.dragY = this.y + Math.sin(angle) * this.maxPull;
-            } else {
-                this.dragX = gameX;
-                this.dragY = gameY;
-            }
-        }
-    }
-
-    onMouseUp() {
-        if (this.isDragging) {
-            this.isDragging = false;
-            this.shoot();
-            this.dragX = this.x;
-            this.dragY = this.y - 40;
-        }
-    }
-
-    shoot() {
-        const dx = this.x - this.dragX;
-        const dy = this.y - this.dragY;
-        const power = 0.15;
-
-        if (!this.game.husky) {
-            this.game.husky = new Husky(this.game, this.x, this.y, dx * power, dy * power);
-            this.wobbleStartTime = performance.now();
-            this.game.shotHit = false; // Reset hit tracking for this shot
-            this.game.audio.shoot(); // PLAY SHOOT
-        }
-    }
-
-    reset() {
-        // Called when husky is off screen, can animate return of band
-    }
-
-    draw(ctx) {
-        // Draw Bands Behind
-        ctx.strokeStyle = '#333';
-        ctx.lineWidth = 6;
-        ctx.beginPath();
-        const leftTipX = this.x - 20;
-        const leftTipY = this.y - 38;
-        const rightTipX = this.x + 20;
-        const rightTipY = this.y - 38;
-
-        if (this.isDragging) {
-            // Taut Lines (Dragging)
-            ctx.moveTo(leftTipX, leftTipY);
-            ctx.lineTo(this.dragX, this.dragY);
-            ctx.lineTo(rightTipX, rightTipY);
-        } else {
-            // Relaxed / Drooping (Idle or Empty)
-            ctx.moveTo(leftTipX, leftTipY);
-
-            let controlY = this.y - 20; // Base relaxed depth
-
-            // Add wobble if Empty (Husky flying)
-            if (this.game.husky) {
-                const timeSinceRelease = performance.now() - this.wobbleStartTime;
-                if (timeSinceRelease < 1000) {
-                    const frequency = 0.02;
-                    const decay = 0.005;
-                    const amplitude = 30;
-                    const wobbleY = amplitude * Math.exp(-decay * timeSinceRelease) * Math.sin(frequency * timeSinceRelease);
-                    controlY += wobbleY;
-                }
-            }
-
-            // Curve down to the center
-            ctx.quadraticCurveTo(this.x, controlY, rightTipX, rightTipY);
-        }
-        ctx.stroke();
-
-        // Draw Sprite Base
-        // Assuming sprite is centered at bottom
-        this.sprite.draw(ctx, this.x, this.y, 80, 80);
-
-        // Draw Husky if ready to shoot (not flying)
-        if (!this.game.husky) {
-            // Determine position: drag position if dragging, or center if idle
-            const hx = this.isDragging ? this.dragX : this.x;
-            // Align idle Y with the relaxed curve bottom (y - 20)
-            const hy = this.isDragging ? this.dragY : this.y - 30;
-
-            // Draw slightly smaller sized husky for the sling
-            this.huskySprite.draw(ctx, hx, hy, 60, 60);
-        }
-    }
-}
-
-class Husky {
-    constructor(game, x, y, dx, dy) {
-        this.game = game;
-        this.x = x;
-        this.y = y;
-        this.dx = dx;
-        this.dy = dy;
-        this.radius = 25;
-        this.gravity = 0.4;
-        this.friction = 0.99;
-        this.rotation = 0;
-        this.wobble = 0;
-
-        this.sprite = new Sprite({
-            image: this.game.assets['husky']
-        });
-    }
-
-    update(timestamp) {
-        this.x += this.dx;
-        this.y += this.dy;
-        this.dy += this.gravity;
-
-        // Calculate rotation based on velocity
-        this.rotation = Math.atan2(this.dy, this.dx);
-
-        // Animate wobbling
-        this.wobble += 0.5;
-
-        this.sprite.update(timestamp);
-    }
-
-    draw(ctx) {
-        // Procedural Animation: Squash and Stretch
-        const scale = 1 + Math.sin(this.wobble) * 0.25;
-        const width = 70 * scale;
-        const height = 70 * (2 - scale); // Preserve approximate area
-
-        this.sprite.draw(ctx, this.x, this.y, width, height, this.rotation);
-    }
-}
-
-class Blunt {
-    constructor(game, x, y, lifetime, speedMultiplier = 1) {
-        this.game = game;
-        this.x = x;
-        this.y = y;
-        this.radius = 25;
-        this.spawnTime = performance.now();
-        this.lifetime = lifetime;
-        this.baseY = y;
-
-        this.sprite = new Sprite({
-            image: this.game.assets['blunt']
-        });
-
-        // Speed increases with multiplier
-        this.speed = (Math.random() * 2 + 1) * speedMultiplier;
-
-        // Special Types
-        const rand = Math.random();
-        this.type = 'normal';
-        this.basePoints = 10;
-        this.hp = 1;
-        this.color = null; // Default use sprite
-
-        if (rand < 0.1) { // 10% Golden
-            this.type = 'gold';
-            this.speed *= 1.5;
-            this.hp = 1;
-            this.basePoints = 50; // 5x Standard
-            this.color = '#FFD700';
-        } else if (rand < 0.25) { // 15% Armored
-            this.type = 'armored';
-            this.speed *= 0.8;
-            this.hp = 2; // Takes 2 hits
-            this.basePoints = 25;
-            this.color = '#A0A0A0';
-        }
-
-        // Reduced amplitude to prevent swooping too low
-        this.amplitude = Math.random() * 20 + 20;
-        this.frequency = Math.random() * 0.005 + 0.002;
-        this.direction = Math.random() > 0.5 ? 1 : -1;
-        this.lastHitTime = 0;
-    }
-
-    hit() {
-        const now = performance.now();
-        if (now - this.lastHitTime < 400) {
-            return { hit: false };
-        }
-        this.lastHitTime = now;
-        this.hp--;
-        return {
-            hit: true,
-            destroyed: this.hp <= 0,
-            score: this.basePoints
-        };
-    }
-
-    isExpired(timestamp) {
-        return (timestamp - this.spawnTime) > this.lifetime;
-    }
-
-    update(timestamp) {
-        const age = timestamp - this.spawnTime;
-
-        // Horizontal movement
-        this.x += this.speed * this.direction;
-
-        // Zigzag / Sine wave
-        this.y = this.baseY + Math.sin(age * this.frequency) * this.amplitude;
-
-        // Bounce off walls
-        if (this.x > this.game.width - 50 || this.x < 50) {
-            this.direction *= -1;
-        }
-
-        this.sprite.update(timestamp);
-    }
-
-    draw(ctx) {
-        const age = performance.now() - this.spawnTime;
-        // Opacity fade out near end
-        let alpha = 1;
-        if (age > this.lifetime - 1000) {
-            alpha = (this.lifetime - age) / 1000;
-        }
-
-        ctx.save();
-        ctx.globalAlpha = Math.max(0, alpha);
-
-        this.sprite.draw(ctx, this.x, this.y, 60, 60, 0); // Slight larger
-
-        // Overlay for special types
-        if (this.type === 'gold') {
-            ctx.globalCompositeOperation = 'source-atop'; // Tint? or just draw circle
-            ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, 30, 0, Math.PI * 2);
-            ctx.fill();
-            // Sparkle effect?
-            if (Math.random() < 0.2) {
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(this.x + (Math.random() - 0.5) * 40, this.y + (Math.random() - 0.5) * 40, 4, 4);
-            }
-        } else if (this.type === 'armored') {
-            ctx.fillStyle = 'rgba(100, 100, 100, 0.4)';
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, 30, 0, Math.PI * 2);
-            ctx.fill();
-            // Draw HP indicator if damaged?
-        }
-
-        ctx.restore();
-    }
-}
 
 // Initialize game on load
 window.onload = async () => {
@@ -1293,89 +1005,7 @@ window.onload = async () => {
     }
 };
 
-// --- Particle System ---
-class Particle {
-    constructor(x, y, color, speed, life) {
-        this.x = x;
-        this.y = y;
-        this.color = color;
-        const angle = Math.random() * Math.PI * 2;
-        this.vx = Math.cos(angle) * speed;
-        this.vy = Math.sin(angle) * speed;
-        this.life = life;
-        this.maxLife = life;
-        this.size = Math.random() * 4 + 2;
-        this.gravity = 0.1;
-    }
-    update() {
-        this.x += this.vx;
-        this.y += this.vy;
-        this.vy += this.gravity;
-        this.life--;
-    }
-    draw(ctx) {
-        ctx.globalAlpha = this.life / this.maxLife;
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.x, this.y, this.size, this.size);
-        ctx.globalAlpha = 1;
-    }
-}
 
-class FloatingText {
-    constructor(x, y, text, color) {
-        this.x = x;
-        this.y = y;
-        this.text = text;
-        this.color = color;
-        this.life = 60; // frames
-        this.maxLife = 60;
-        this.vy = -1; // float up
-    }
-    update() {
-        this.y += this.vy;
-        this.life--;
-    }
-    draw(ctx) {
-        ctx.globalAlpha = this.life / this.maxLife;
-        ctx.fillStyle = this.color;
-        ctx.font = '10px "Press Start 2P"';
-        ctx.fillText(this.text, this.x, this.y);
-        ctx.globalAlpha = 1;
-    }
-}
-
-class ParticleManager {
-    constructor(game) {
-        this.game = game;
-        this.particles = [];
-        this.texts = [];
-        // Sprite particles not currently used, keeping logic simple for now
-    }
-    spawnExplosion(x, y, color = '#8b4513') { // blunt brown
-        for (let i = 0; i < 10; i++) {
-            this.particles.push(new Particle(x, y, color, Math.random() * 2 + 1, 30 + Math.random() * 20));
-        }
-    }
-    spawnFloatingText(x, y, text, color = '#fff') {
-        this.texts.push(new FloatingText(x, y, text, color));
-    }
-    update() {
-        for (let i = this.particles.length - 1; i >= 0; i--) {
-            let p = this.particles[i];
-            p.update();
-            if (p.life <= 0) this.particles.splice(i, 1);
-        }
-        for (let i = this.texts.length - 1; i >= 0; i--) {
-            let t = this.texts[i];
-            t.update();
-            if (t.life <= 0) this.texts.splice(i, 1);
-        }
-    }
-    draw(ctx) {
-        this.particles.forEach(p => p.draw(ctx));
-        this.texts.forEach(t => t.draw(ctx));
-    }
-}
 
 // --- Global UI Listeners (Footer) ---
 document.addEventListener('DOMContentLoaded', () => {
@@ -1401,16 +1031,16 @@ document.addEventListener('DOMContentLoaded', () => {
             closeAllModals(); // Safe Close
             faqModal.classList.remove('hidden');
 
-            // Activate Info tab by default
-            const infoTab = document.querySelector('.faq-tab[data-tab="info"]');
-            if (infoTab) infoTab.click();
+            // Activate Gameplay tab by default
+            const gameplayTab = document.querySelector('.faq-tab[data-tab="gameplay"]');
+            if (gameplayTab) gameplayTab.click();
         };
         closeFaqBtn.onclick = () => { faqModal.classList.add('hidden'); };
     }
 
     // FAQ Tabs Logic
     const tabs = document.querySelectorAll('.faq-tab');
-    const sections = document.querySelectorAll('.faq-section');
+    const contents = document.querySelectorAll('.faq-content');
 
     tabs.forEach(tab => {
         tab.onclick = () => {
@@ -1428,8 +1058,8 @@ document.addEventListener('DOMContentLoaded', () => {
             tab.style.color = '#fff';
 
             // Switch Content
-            sections.forEach(s => s.classList.add('hidden'));
-            const targetId = `faq-${tab.dataset.tab}`; // matches 'info', 'controls', 'payouts'
+            contents.forEach(c => c.classList.add('hidden'));
+            const targetId = `faq-${tab.dataset.tab}`;
             const targetContent = document.getElementById(targetId);
             if (targetContent) targetContent.classList.remove('hidden');
         };

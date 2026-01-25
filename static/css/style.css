@@ -81,8 +81,8 @@ canvas {
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 10;
-    /* Above HUD */
+    z-index: 2;
+    /* Below HUD, Above Background */
     pointer-events: auto;
     /* Ensure clicks pass to canvas or are handled if needed */
     background: transparent;
@@ -117,8 +117,8 @@ canvas {
     padding: 0 20px;
     font-size: 0.9rem;
     color: var(--nes-green);
-    z-index: 5;
-    /* Below Canvas, Above Background */
+    z-index: 10;
+    /* Above Canvas */
 }
 
 #leaderboard-hud {
@@ -581,7 +581,8 @@ canvas {
 /* Leaderboard List - Expanded */
 #leaderboard-list {
     flex: 1;
-    overflow-y: auto;
+    overflow-y: hidden;
+    /* Pagination used instead */
     width: 90%;
     margin-bottom: 10px;
     border: 4px solid #fff;
@@ -637,13 +638,76 @@ canvas {
     background: transparent;
     color: #fff;
     border: none;
-    font-size: 1.5rem;
     font-family: inherit;
+    font-size: 1rem;
     cursor: pointer;
-    padding: 0 10px;
-    opacity: 0.7;
-    transition: opacity 0.2s;
 }
+
+.nav-arrow:hover {
+    color: var(--nes-green);
+}
+
+/* Leaderboard Rows - Compact */
+.leaderboard-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 5px 0;
+    /* Tight padding */
+    border-bottom: 1px dotted #333;
+    font-size: 0.75rem;
+    /* Small font to fit 10 items */
+    color: #fff;
+    font-family: var(--font-nes);
+}
+
+.leaderboard-row span:nth-child(1) {
+    width: 10%;
+    text-align: left;
+    color: #666;
+}
+
+/* Rank */
+.leaderboard-row span:nth-child(2) {
+    width: 60%;
+    text-align: center;
+}
+
+/* Name */
+.leaderboard-row span:nth-child(3) {
+    width: 30%;
+    text-align: right;
+    color: var(--nes-green);
+}
+
+/* Score */
+
+.leaderboard-header {
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    border-bottom: 2px solid #fff;
+    font-size: 0.75rem;
+    color: var(--nes-sky);
+    font-family: var(--font-nes);
+}
+
+.leaderboard-header span:nth-child(1) {
+    width: 10%;
+    text-align: left;
+}
+
+.leaderboard-header span:nth-child(2) {
+    width: 60%;
+    text-align: center;
+}
+
+.leaderboard-header span:nth-child(3) {
+    width: 30%;
+    text-align: right;
+}
+
+
 
 .nav-arrow:hover {
     opacity: 1;

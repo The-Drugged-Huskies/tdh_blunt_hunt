@@ -93,11 +93,11 @@ You must tell the frontend where to find your new contract.
 3. Paste your new address there.
 4. Save and deploy your frontend.
 
-### 3. Admin: Fund Recovery (`withdraw.html`)
+### 3. Admin: Fund Recovery (`admin.html`)
 
 The contract collects 25% of fees for the Dev and 75% for the Pot. The Pot pays out automatically, but if you need to recover funds manually:
 
-1. Open `static/withdraw.html` in your browser.
+1. Open `static/admin.html` in your browser.
 2. Connect the **Owner Wallet** (the one that deployed the contract).
 3. Click **Recover Funds** to withdraw the entire contract balance to your wallet.
 

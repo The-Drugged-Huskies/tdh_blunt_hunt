@@ -70,7 +70,7 @@ vercel --prod
 
 1. Open your new Vercel URL (e.g., `https://tdh-blunt-hunt.vercel.app`).
 2. Your game is live! 🌍
-3. **IMPORTANT**: You need to update `wallet.js` and `withdraw.html`?
+3. **IMPORTANT**: You need to update `wallet.js` and `admin.html`?
     - **No!** `wallet.js` runs in the browser, so it just needs the *Contract Address*.
     - **However**, if you hardcoded `http://localhost:5000` anywhere, change it. But our code uses relative paths (`/api/sign-score`), so it will automatically work on Vercel!
 

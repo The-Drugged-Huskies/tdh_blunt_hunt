@@ -27,10 +27,10 @@ def index():
     return render_template('index.html')
 
 
-@app.route('/withdraw')
-def withdraw():
-    """Serves the fund recovery tool for the contract owner."""
-    return send_from_directory('static', 'withdraw.html')
+@app.route('/admin')
+def admin():
+    """Serves the admin panel for the contract owner."""
+    return send_from_directory('static', 'admin.html')
 
 
 @app.route('/deploy')

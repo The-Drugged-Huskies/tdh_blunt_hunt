@@ -4,7 +4,7 @@
  */
 const GameConfig = {
     // The deployed Leaderboard Contract Address
-    LEADERBOARD_CONTRACT_ADDRESS: "0x2e50E3beEd076d6F72Bf79d05032FE4Af1A2729f",
+    LEADERBOARD_CONTRACT_ADDRESS: "0xB39E6E0C6674564b6f36E112458E65aE05395737",
 
     // Default Game Cost (Visual only, contract enforces actual cost)
     GAME_COST_DOGE: "1.0",

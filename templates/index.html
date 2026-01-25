@@ -192,79 +192,76 @@
 
                 <!-- FAQ Modal -->
                 <section id="faq-modal" class="overlay hidden" style="z-index: 2000; padding: 20px;">
-                    <h1 class="title" style="font-size: 2rem; margin-bottom: 20px;">GAME GUIDE</h1>
+                    <h1 class="title" style="font-size: 2rem; margin-bottom: 20px;">FAQ</h1>
 
                     <!-- Tabs -->
                     <div id="faq-tabs"
-                        style="display: flex; gap: 10px; margin-bottom: 20px; justify-content: center; width: 100%;">
-                        <button class="btn-secondary small faq-tab active-tab" data-tab="info">INFO</button>
-                        <button class="btn-secondary small faq-tab" data-tab="controls">CONTROLS</button>
-                        <button class="btn-secondary small faq-tab" data-tab="payouts">PAYOUTS</button>
+                        style="display: flex; gap: 4px; margin-bottom: 10px; justify-content: center; width: 100%;">
+                        <button class="btn-secondary small faq-tab active-tab" data-tab="gameplay"
+                            style="background: #209cee; color: white;">GAMEPLAY</button>
+                        <button class="btn-secondary small faq-tab" data-tab="rules">RULES</button>
+                        <button class="btn-secondary small faq-tab" data-tab="support">SUPPORT</button>
                     </div>
 
-                    <!-- Content Container (Full Width/Height-ish) -->
-                    <div class="faq-content-box leaderboard-box"
-                        style="flex: 1; width: 90%; overflow-y: auto; text-align: left; margin-bottom: 20px;">
+                    <!-- Content Box (Mimics Leaderboard List) -->
+                    <div class="leaderboard-box" style="height: 220px; overflow-y: auto; text-align: left;">
 
-                        <!-- INFO Section -->
-                        <div id="faq-info" class="faq-section">
+                        <!-- Gameplay Section -->
+                        <div id="faq-gameplay" class="faq-content">
                             <div class="faq-list-item">
-                                <div class="faq-question">THE GOAL</div>
-                                <div>Launch Huskies. Catch Blunts. Get High Scores.</div>
+                                <div class="faq-question">GOAL</div>
+                                <div>Shoot Blunts at Huskies. Earn points.</div>
+                            </div>
+                            <div class="faq-list-item">
+                                <div class="faq-question">CONTROLS</div>
+                                <div>Drag & Release to shoot.</div>
                             </div>
                             <div class="faq-list-item">
                                 <div class="faq-question">SCORING</div>
-                                <div>
-                                    <span style="color:var(--nes-green)">GREEN</span> = 10pts<br>
-                                    <span style="color:gold">GOLD</span> = 50pts<br>
-                                    <span style="color:#aaa">ARMORED</span> = 2 Hits (25pts)
-                                </div>
-                            </div>
-                            <div class="faq-list-item">
-                                <div class="faq-question">COMBO</div>
-                                <div>Don't miss to keep your multiplier (up to 5x)!</div>
+                                <div>Small Husky: 50pts<br>Big Husky: 10pts</div>
                             </div>
                         </div>
 
-                        <!-- CONTROLS Section -->
-                        <div id="faq-controls" class="faq-section hidden">
-                            <div class="faq-list-item">
-                                <div class="faq-question">AIM & FIRE</div>
-                                <div>Drag your finger or cursor back to aim the slingshot. Release to launch.</div>
-                            </div>
-                            <div class="faq-list-item">
-                                <div class="faq-question">PAUSE</div>
-                                <div>Click the Wallet Button (Top Right) to Pause/Resume.</div>
-                            </div>
-                            <div class="faq-list-item">
-                                <div class="faq-question">RESTART</div>
-                                <div>Stuck? Use the settings menu to reset.</div>
-                            </div>
-                        </div>
-
-                        <!-- PAYOUTS Section -->
-                        <div id="faq-payouts" class="faq-section hidden">
+                        <!-- Rules Section (Pot + Tickets) -->
+                        <div id="faq-rules" class="faq-content hidden">
+                            <!-- Pot Info -->
                             <div class="faq-list-item">
                                 <div class="faq-question">THE POT</div>
-                                <div>75% of every entry goes into the Prize Pot.</div>
+                                <div>75% of fees go to Pot.<br>Winner takes all (60m).</div>
                             </div>
                             <div class="faq-list-item">
-                                <div class="faq-question">THE WINNER</div>
-                                <div>Rank #1 at the end of the round wins the WHOLE POT.</div>
+                                <div class="faq-question">PAYOUT</div>
+                                <div>Automatic smart contract transfer.</div>
+                            </div>
+                            <!-- Tickets Info -->
+                            <div class="faq-list-item">
+                                <div class="faq-question">TICKET COST</div>
+                                <div>1 DOGE = 1 Ticket (1 Round)</div>
                             </div>
                             <div class="faq-list-item">
-                                <div class="faq-question">SCHEDULE</div>
-                                <div>Rounds end at minute <strong>:42</strong> of every hour.</div>
+                                <div class="faq-question">VALIDITY</div>
+                                <div>Ticket burns on score submit or round end.</div>
+                            </div>
+                        </div>
+
+                        <!-- Support Section (No Roadmap) -->
+                        <div id="faq-support" class="faq-content hidden">
+                            <div class="faq-list-item">
+                                <div class="faq-question">GREY BUTTON?</div>
+                                <div>Wait 1-2 mins for transaction confirmation.</div>
                             </div>
                             <div class="faq-list-item">
-                                <div class="faq-question">TICKETS</div>
-                                <div>1 DOGE = 1 Try. Valid until the round ends.</div>
+                                <div class="faq-question">NO AUDIO?</div>
+                                <div>Tap/Click screen once to Initialize.</div>
+                            </div>
+                            <div class="faq-list-item">
+                                <div class="faq-question">LAG?</div>
+                                <div>Use Chrome/Brave. Close tabs.</div>
                             </div>
                         </div>
 
                     </div>
-
-                    <button id="close-faq-btn" class="btn-secondary" style="margin-top: 0;">CLOSE</button>
+                    <button id="close-faq-btn" class="btn-secondary" style="margin-top: 15px;">CLOSE</button>
                 </section>
 
 
@@ -295,6 +292,12 @@
 
     <!-- Scripts -->
     <script src="{{ url_for('static', filename='js/sprite.js') }}"></script>
+    <!-- Entities -->
+    <script src="{{ url_for('static', filename='js/entities/Particle.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/entities/Blunt.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/entities/Husky.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/entities/Slingshot.js') }}"></script>
+
     <script src="{{ url_for('static', filename='js/config.js') }}"></script>
     <script src="{{ url_for('static', filename='js/wallet.js') }}"></script>
     <script src="{{ url_for('static', filename='js/audio.js') }}"></script>

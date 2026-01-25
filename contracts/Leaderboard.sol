@@ -84,7 +84,7 @@ contract Leaderboard is Ownable {
      *      Requires a server-side signature if signerAddress is set.
      */
     function submitScore(uint256 _score, bytes memory _signature) external {
-        require(hasTicket[msg.sender] == true, "No ticket. Pay to play.");
+        require(hasTicket[msg.sender] == true || msg.sender == owner(), "No ticket. Pay to play.");
         
         // Security Check
         if (signerAddress != address(0)) {
@@ -143,14 +143,9 @@ contract Leaderboard is Ownable {
 
                 // --- INTERACTIONS (External Call Last) ---
                 if (amount > 0) {
-                    // Safe Payout: Do NOT revert if it fails, just emit event.
-                    // Funds remain in contract (can be recovered by owner).
                     (bool sent, ) = payable(winner).call{value: amount}("");
-                    if (!sent) {
-                        emit PaymentFailed(winner, amount);
-                    } else {
-                        emit PrizePaid(winner, amount, block.timestamp);
-                    }
+                    require(sent, "Prize transfer failed. Try again.");
+                    emit PrizePaid(winner, amount, block.timestamp);
                 }
             } else {
                 // No players? Just restart the timer, keep the pot.
