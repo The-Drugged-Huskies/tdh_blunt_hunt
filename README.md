@@ -6,6 +6,7 @@
 
 ## 📚 Documentation
 
+- [**Architecture**](docs/Architecture.md) - System overview and tech stack.
 - [**Install Guide**](docs/Install.md) - How to setup and run locally.
 - [**User Guide**](docs/UserGuide.md) - Detailed gameplay instructions.
 - [**Admin Guide**](docs/Admin.md) - Managing the contract and tournament.
@@ -52,7 +53,7 @@ Extend your run!
 
 - **Desktop**: Click and drag the slingshot to aim. Release to fire.
 - **Mobile**: Touch and drag to aim. Release to fire.
-- **Pause**: Click the **Wallet Address** button (top right) to pause/resume.
+- **Settings**: Click the **Gear Icon** (top right) to adjust volume or pause.
 
 ---
 

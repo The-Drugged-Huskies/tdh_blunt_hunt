@@ -77,19 +77,8 @@ class Game {
         this.shakeTime = 0;
 
         // Input handling
-        this.canvas.addEventListener('mousedown', (e) => this.slingshot.onMouseDown(e.clientX, e.clientY));
-        window.addEventListener('mousemove', (e) => this.slingshot.onMouseMove(e.clientX, e.clientY));
-        window.addEventListener('mouseup', () => this.slingshot.onMouseUp());
-
-        this.canvas.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            this.slingshot.onMouseDown(e.touches[0].clientX, e.touches[0].clientY);
-        }, { passive: false });
-        window.addEventListener('touchmove', (e) => {
-            e.preventDefault();
-            this.slingshot.onMouseMove(e.touches[0].clientX, e.touches[0].clientY);
-        }, { passive: false });
-        window.addEventListener('touchend', () => this.slingshot.onMouseUp());
+        // Input handling
+        this.setupInputs();
 
         // UI
         this.startBtn = document.getElementById('start-btn');
@@ -231,6 +220,38 @@ class Game {
         this.initPotPolling();
 
 
+    }
+
+    /**
+     * Binds mouse and touch events to the Slingshot entity.
+     */
+    setupInputs() {
+        this.canvas.addEventListener('mousedown', (e) => {
+            this.slingshot.onMouseDown(e.clientX, e.clientY);
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (this.slingshot) this.slingshot.onMouseMove(e.clientX, e.clientY);
+        });
+        window.addEventListener('mouseup', () => {
+            if (this.slingshot) this.slingshot.onMouseUp();
+        });
+
+        // Touch Events
+        this.canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            this.slingshot.onMouseDown(e.touches[0].clientX, e.touches[0].clientY);
+        }, { passive: false });
+
+        window.addEventListener('touchmove', (e) => {
+            if (this.slingshot) {
+                e.preventDefault();
+                this.slingshot.onMouseMove(e.touches[0].clientX, e.touches[0].clientY);
+            }
+        }, { passive: false });
+
+        window.addEventListener('touchend', () => {
+            if (this.slingshot) this.slingshot.onMouseUp();
+        });
     }
 
     async initPotPolling() {
