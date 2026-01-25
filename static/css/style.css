@@ -378,7 +378,8 @@ canvas {
 }
 
 .leaderboard-row {
-    font-size: 0.8rem;
+    font-size: 0.75rem;
+    /* Slightly smaller (~1px less) */
     border-bottom: 1px dashed #333;
 }
 
@@ -592,6 +593,8 @@ canvas {
     background: #000;
 }
 
+
+
 #leaderboard-controls button {
     font-size: 0.6rem;
     padding: 8px 12px;
@@ -655,8 +658,8 @@ canvas {
     justify-content: space-between;
     padding: 5px 0;
     /* Tight padding */
-    border-bottom: 1px dotted #333;
-    font-size: 0.75rem;
+    border-bottom: 0px dotted #333;
+    margin: 2px font-size: 0.70rem;
     /* Small font to fit 10 items */
     color: #fff;
     font-family: var(--font-nes);
