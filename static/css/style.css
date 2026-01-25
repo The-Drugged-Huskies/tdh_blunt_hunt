@@ -660,7 +660,7 @@ canvas {
     /* Tight padding */
     border-bottom: 0px dotted #333;
     margin: 2px;
-    font-size: 0.70rem;
+    font-size: 10px;
     /* Small font to fit 10 items */
     color: #fff;
     font-family: var(--font-nes);
