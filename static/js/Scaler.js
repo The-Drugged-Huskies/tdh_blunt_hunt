@@ -11,6 +11,7 @@ class Scaler {
 
         // Debounce resize
         this.resizeTimeout = null;
+        this.isStretch = false;
 
         if (this.target) {
             this.init();
@@ -48,19 +49,36 @@ class Scaler {
         const scaleY = winH / this.baseHeight;
 
         // "Contain" logic: fit completely visible
-        const scale = Math.min(scaleX, scaleY);
+        // If stretch mode is on, we scale X and Y independently
+        let finalScaleX = scaleX;
+        let finalScaleY = scaleY;
+
+        if (!this.isStretch) {
+            const scale = Math.min(scaleX, scaleY);
+            finalScaleX = scale;
+            finalScaleY = scale;
+        }
 
         // Apply
         // We set the transform
-        this.target.style.transform = `scale(${scale})`;
+        this.target.style.transform = `scale(${finalScaleX}, ${finalScaleY})`;
 
         // Centering is handled by CSS (flex parent), 
         // but we assume parent is Flex Center.
 
-        // Expose scale for InputSystem
-        window.GAME_SCALE = scale;
+        // Expose scale for InputSystem (Uniform scale assumption for mouse logic might break with stretch?)
+        // InputSystem needs both scales if we stretch.
+        window.GAME_SCALE_X = finalScaleX;
+        window.GAME_SCALE_Y = finalScaleY;
+        window.GAME_SCALE = finalScaleX; // Legacy fallback
 
-        console.log(`[Scaler] Applied Scale: ${scale.toFixed(3)} (Window: ${winW}x${winH})`);
+        console.log(`[Scaler] Applied Scale: ${finalScaleX.toFixed(3)}x${finalScaleY.toFixed(3)} (Window: ${winW}x${winH})`);
+    }
+
+    toggleStretch() {
+        this.isStretch = !this.isStretch;
+        this.applyScale();
+        return this.isStretch;
     }
 }
 

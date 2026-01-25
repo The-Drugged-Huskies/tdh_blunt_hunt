@@ -312,10 +312,11 @@ class Game {
         const fsBtn = document.getElementById('fullscreen-btn');
         if (fsBtn) {
             fsBtn.addEventListener('click', () => {
-                if (!document.fullscreenElement) {
-                    document.documentElement.requestFullscreen().catch(err => console.log(err));
-                } else {
-                    if (document.exitFullscreen) document.exitFullscreen();
+                if (window.scaler) {
+                    const isStretched = window.scaler.toggleStretch();
+                    console.log("Stretch Mode:", isStretched);
+                    // visual feedback?
+                    fsBtn.style.color = isStretched ? '#00ff00' : '#fff';
                 }
             });
         }
