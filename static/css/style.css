@@ -659,7 +659,8 @@ canvas {
     padding: 5px 0;
     /* Tight padding */
     border-bottom: 0px dotted #333;
-    margin: 2px font-size: 0.70rem;
+    margin: 2px;
+    font-size: 0.70rem;
     /* Small font to fit 10 items */
     color: #fff;
     font-family: var(--font-nes);

@@ -308,6 +308,18 @@ class Game {
     }
 
     initDOM() {
+        // Fullscreen Toggle
+        const fsBtn = document.getElementById('fullscreen-btn');
+        if (fsBtn) {
+            fsBtn.addEventListener('click', () => {
+                if (!document.fullscreenElement) {
+                    document.documentElement.requestFullscreen().catch(err => console.log(err));
+                } else {
+                    if (document.exitFullscreen) document.exitFullscreen();
+                }
+            });
+        }
+
         // DOM elements for Game Over
         this.submitScoreContainer = document.getElementById('submit-score-container');
         this.gameOverMenu = document.getElementById('game-over-menu');
@@ -401,6 +413,13 @@ class Game {
 
         this.blunts = [];
         this.husky = null;
+        this.husky = null;
+
+        // Auto-Fullscreen on Mobile
+        if (!document.fullscreenElement && /Mobi|Android/i.test(navigator.userAgent)) {
+            document.documentElement.requestFullscreen().catch(() => { });
+        }
+
         this.isRunning = true;
         this.hits = 0; // Total hits (visual dots)
         this.updateHitMarkers();
