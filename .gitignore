@@ -61,3 +61,7 @@ static/data/leaderboard.json
 
 # Scripts
 verify_signer.py
+
+# Dev Tools (Local Only)
+static/test.html
+static/deploy.html
