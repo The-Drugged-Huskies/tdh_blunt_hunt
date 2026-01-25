@@ -1,6 +1,6 @@
 /**
- * Game Class v0.69
- * Manages the main game loop, state, and rendering context.
+ * Game Class
+    * Manages the main game loop, state, and rendering context.
  * Coordinates interaction between the Slingshot, Husky, and Blunts.
  */
 class Game {
@@ -18,6 +18,15 @@ class Game {
         window.game = this;
 
         // --- Configuration ---
+        this.version = GameConfig.GAME_VERSION;
+
+        // Update UI Version Refs
+        document.title = `Blunt Hunt v${this.version} - Dogechain Edition`;
+        const verSpan = document.getElementById('game-version');
+        if (verSpan) verSpan.innerText = `v${this.version}`;
+
+        console.log(`Initializing Blunt Hunt v${this.version}`);
+
         // Fixed VGA Resolution (Matches new 640x480 container)
         this.canvas.width = 640;
         this.canvas.height = 480;

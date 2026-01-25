@@ -1,5 +1,5 @@
 /**
- * Wallet Interaction Module v0.70
+ * Wallet Interaction Module
  * Handles connection to Dogechain, contract interaction, and UI updates.
  */
 
@@ -399,8 +399,8 @@ async function fetchBalance(account) {
 
 
 function initWallet() {
-
-    console.log("Initializing Wallet...");
+    const v = GameConfig ? GameConfig.GAME_VERSION : "?.??";
+    console.log(`Initializing Wallet v${v}`);
 
     if (connectBtn) {
 
