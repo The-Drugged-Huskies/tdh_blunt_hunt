@@ -791,7 +791,3 @@ canvas {
 .hidden {
     display: none !important;
 }
-
-.faq-content.hidden {
-    display: none !important;
-}

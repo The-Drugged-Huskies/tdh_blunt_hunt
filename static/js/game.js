@@ -1222,8 +1222,6 @@ class Blunt {
         // Bounce off walls
         if (this.x > this.game.width - 50 || this.x < 50) {
             this.direction *= -1;
-            // Slightly erratic bounce speed change?
-            // this.speed = (Math.random() * 2 + 1) * this.game.speedMultiplier; 
         }
 
         this.sprite.update(timestamp);
@@ -1351,7 +1349,7 @@ class ParticleManager {
         this.game = game;
         this.particles = [];
         this.texts = [];
-        this.image = new Image(); // Placeholder for maybe sprite particles
+        // Sprite particles not currently used, keeping logic simple for now
     }
     spawnExplosion(x, y, color = '#8b4513') { // blunt brown
         for (let i = 0; i < 10; i++) {
