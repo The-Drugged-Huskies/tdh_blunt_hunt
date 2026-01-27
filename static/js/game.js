@@ -27,6 +27,26 @@ class Game {
 
         console.log(`Initializing Blunt Hunt v${this.version}`);
 
+        // --- iOS Detection Message ---
+        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+            (navigator.userAgent.includes("Mac") && "ontouchend" in document);
+
+        if (isIOS) {
+            const startScreen = document.getElementById('start-screen');
+            const subtitle = startScreen ? startScreen.querySelector('.subtitle') : null;
+
+            if (subtitle) {
+                const iosMsg = document.createElement('p');
+                iosMsg.innerText = "APPLE DEVICE DETECTED";
+                iosMsg.style.color = '#83d313'; // Greenish
+                iosMsg.style.fontSize = '0.6rem';
+                iosMsg.style.marginTop = '10px';
+                iosMsg.style.marginBottom = '10px';
+
+                subtitle.parentNode.insertBefore(iosMsg, subtitle.nextSibling);
+            }
+        }
+
         // Fixed VGA Resolution (Matches new 640x480 container)
         this.canvas.width = 640;
         this.canvas.height = 480;
