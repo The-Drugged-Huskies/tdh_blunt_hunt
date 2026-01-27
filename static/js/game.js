@@ -445,9 +445,26 @@ class Game {
         // Start Music (Safe Mode)
         try {
             this.audio.startMusic();
+
+            // Debug: Show banner on success too
+            const errBanner = document.getElementById('audio-error-message');
+            if (errBanner) {
+                errBanner.classList.remove('hidden');
+                errBanner.style.color = '#00ff00';
+                errBanner.style.borderColor = '#00ff00';
+                errBanner.innerText = "AUDIO INITIALIZED";
+                // Hide after 3s
+                setTimeout(() => errBanner.classList.add('hidden'), 3000);
+            }
         } catch (e) {
             console.warn("Audio start failed:", e);
-            alert("Audio Error: " + e.message + "\nGame will play without sound.");
+            const errBanner = document.getElementById('audio-error-message');
+            if (errBanner) {
+                errBanner.classList.remove('hidden');
+                errBanner.style.color = '#ffdd44';
+                errBanner.style.borderColor = '#ffdd44';
+                errBanner.innerText = "AUDIO ERROR: " + e.message + " (SILENT MODE)";
+            }
         }
 
         requestAnimationFrame(this.loop);
