@@ -321,20 +321,7 @@ class Game {
             });
         }
 
-        // Title Audio Test
-        const titleEl = document.querySelector('.title');
-        if (titleEl) {
-            titleEl.style.cursor = 'pointer';
-            titleEl.title = 'Click to Test Audio';
-            titleEl.addEventListener('click', () => {
-                // Visual Feedback
-                titleEl.style.color = '#00ff00';
-                setTimeout(() => titleEl.style.color = '#ffd700', 300);
 
-                // Audio Test
-                this.audio.playIntroTune();
-            });
-        }
 
         // DOM elements for Game Over
         this.submitScoreContainer = document.getElementById('submit-score-container');
@@ -460,6 +447,7 @@ class Game {
             this.audio.startMusic();
         } catch (e) {
             console.warn("Audio start failed:", e);
+            alert("Audio Error: " + e.message + "\nGame will play without sound.");
         }
 
         requestAnimationFrame(this.loop);
