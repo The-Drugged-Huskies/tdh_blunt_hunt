@@ -45,12 +45,17 @@ When you connect your wallet, the dashboard now shows **Current Values** for all
 
 ### 🛡️ Security (Anti-Cheat)
 
-* **Signer Address**: This must match the address of the `SIGNER_PRIVATE_KEY` in your backend `env.json`.
-* **How to set**:
-    1. Get the address from your backend setup.
-    2. Paste it here.
-    3. Click **SET SIGNER**.
-* **Verify**: Text should turn **GREEN** and display the address.
+* **Signer Address**: This controls the backendverification logic.
+  * **Status**:
+    * **RED ("NOT SET")**: Contract is Open Mode (anyone can submit any score). Default after deployment.
+    * **GREEN (Address)**: Contract is Secured (only backend can sign scores).
+* **How to Set**:
+    1. Deploy your contract.
+    2. Go to `admin.html`.
+    3. Copy your **Backend Signer Address** (from your `.env` or `signer_debug.html`).
+    4. Paste it into the input field.
+    5. Click **SET SIGNER ADDRESS**.
+    6. **Verify**: The status text should turn GREEN.
 
 ### 💸 Funds
 

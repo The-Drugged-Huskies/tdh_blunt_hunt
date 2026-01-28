@@ -8,7 +8,7 @@ const wm = window.walletManager; // Assumes these are init in their files
 const ls = window.leaderboardService;
 
 // Configs from Config.js
-let GAME_COST_DOGE = GameConfig.GAME_COST_DOGE;
+// Configs from Config.js
 
 // --- DOM Elements ---
 const connectBtn = document.getElementById('connect-wallet-btn');
@@ -126,7 +126,11 @@ window.payEntryFee = async () => {
         return { success: false };
     }
 
-    const res = await ls.payEntryFee(GAME_COST_DOGE);
+    // Fetch dynamic cost just before paying
+    const currentCost = await ls.getGameCost();
+    // console.log("Paying Entry Fee:", currentCost);
+
+    const res = await ls.payEntryFee(currentCost);
     if (!res.success) {
         const msg = (res.error && res.error.message && res.error.message.includes("INSUFFICIENT"))
             ? "Insufficient Funds!"
@@ -134,6 +138,10 @@ window.payEntryFee = async () => {
         await window.showCustomModal(msg);
     }
     return res;
+};
+
+window.fetchGameCost = async () => {
+    return await ls.getGameCost();
 };
 
 window.submitHighScore = async (score) => {

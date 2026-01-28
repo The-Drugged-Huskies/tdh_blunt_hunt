@@ -105,7 +105,13 @@ class LeaderboardService {
             });
             const sigData = await sigRes.json();
 
-            if (!sigData.success) return { success: false, reason: "SIGNATURE_FAILED" };
+            if (!sigData.success) {
+                console.error("❌ Signature Failed:", sigData.error);
+                return { success: false, reason: "SIGNATURE_FAILED" };
+            }
+
+            console.log("✅ Signature Received:", sigData.signature);
+            console.log("📝 Submitting to Contract...");
 
             const tx = await contract.submitScore(score, sigData.signature);
             await tx.wait();
@@ -141,6 +147,17 @@ class LeaderboardService {
         const tx = await contract.distributePrize();
         await tx.wait();
         return tx.hash;
+    }
+
+    async getGameCost() {
+        try {
+            const contract = this.getPublicContract();
+            const cost = await contract.gameCost();
+            return ethers.utils.formatEther(cost);
+        } catch (e) {
+            console.error("Fetch Cost Error:", e);
+            return "1.0"; // Fallback
+        }
     }
 
     async checkEligibility(score) {

@@ -13,6 +13,19 @@ This document contains internal development notes, deployment instructions, and 
 
 ## ⚙️ Game Mechanics Implementation
 
+### Score & Leaderboards
+
+The game features two distinct Leaderboards:
+
+1. **Tournament Leaderboard (Hourly)**:
+    - Resets every hour (at XX:42).
+    - Top rank wins the Pot.
+    - Stored on-chain, wiped on payout.
+2. **All-Time Leaderboard**:
+    - **Never Resets**.
+    - Tracks the Top 100 highest scores in history.
+    - Stored permanently on the Smart Contract.
+
 ### Score & Multipliers (`game.js`)
 
 - **Combo Logic**:
@@ -84,16 +97,26 @@ We use a client-side deployment tool to avoid requiring a complex local crypto e
 3. Click **Deploy Contract**.
 4. **COPY** the resulting Contract Address from the log.
 
-### 2. Configuration (`wallet.js`)
+### 2. Configuration (`config.js`)
 
 You must tell the frontend where to find your new contract.
 
-1. Open `static/js/wallet.js`.
-2. Find line ~191: `const LEADERBOARD_CONTRACT_ADDRESS = "..."`.
+1. Open `static/js/config.js`.
+2. Find line ~7: `LEADERBOARD_CONTRACT_ADDRESS: "..."`.
 3. Paste your new address there.
-4. Save and deploy your frontend.
+4. Save file.
+5. **Clear Cache** (Ctrl + F5) and reload your game.
 
-### 3. Admin: Fund Recovery (`admin.html`)
+### 3. Security Setup (`admin.html`)
+
+**CRITICAL**: After deployment, your contract is unsecured.
+
+1. Open `static/admin.html`.
+2. Connect Owner Wallet.
+3. Set your **Backend Signer Address** (from `signer_debug.html`).
+4. Click **SET SIGNER**.
+
+### 4. Admin: Fund Recovery (`admin.html`)
 
 The contract collects 25% of fees for the Dev and 75% for the Pot. The Pot pays out automatically, but if you need to recover funds manually:
 

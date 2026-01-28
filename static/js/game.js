@@ -568,8 +568,9 @@ class Game {
         } else {
             // Smart Error Handling
             if (result.reason && result.reason.includes("NO_TICKET")) {
+                const cost = await window.fetchGameCost(); // Fetch dynamic cost
                 const payNow = await window.showCustomModal(
-                    "ENTRY TOKEN EXPIRED!\n\nPay 1 DOGE to submit this score?",
+                    `ENTRY TOKEN EXPIRED!\n\nPay ${cost} DOGE to submit this score?`,
                     true,
                     "PAYMENT REQUIRED"
                 );

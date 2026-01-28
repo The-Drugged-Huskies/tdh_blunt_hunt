@@ -24,7 +24,10 @@ This approach ensures sharp pixel-art rendering for gameplay while allowing acce
   - Manages the Game Loop (`requestAnimationFrame`).
   - Handles State (`MENU`, `PLAYING`, `GAMEOVER`).
   - Coordinations Entities (`Slingshot`, `Husky`, `Blunt`).
-- **`wallet.js`**: Web3 integration (connecting wallets, verifying signatures).
+- **`WalletManager.js`**: Handles MetaMask connection, network switching, and account events.
+- **`LeaderboardService.js`**: Handles all Smart Contract interactions (Read/Write).
+- **`wallet.js`**: (Controller) Bridges the Game, DOM, and Services (`WalletManager`, `LeaderboardService`).
+- **`config.js`**: Central configuration (Contract Address, RPC, Chain ID).
 - **`audio.js`**: Sound effects and music management.
 - **`entities/`**: Logic for individual game objects.
 

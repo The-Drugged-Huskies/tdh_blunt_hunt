@@ -6,9 +6,6 @@ const GameConfig = {
     // The deployed Leaderboard Contract Address
     LEADERBOARD_CONTRACT_ADDRESS: "0xd9a16c4B00BDFeC1e0E2691266E31Dd2794d9F09",
 
-    // Default Game Cost (Visual only, contract enforces actual cost)
-    GAME_COST_DOGE: "1.0",
-
     // Game Version
     GAME_VERSION: "0.78",
 
@@ -16,7 +13,7 @@ const GameConfig = {
     DOGECHAIN_ID: '0x7D0', // 2000
     RPC_URL: 'https://rpc.dogechain.dog',
 
-    // Network Configuration for MetaMask
+    // Network Configuration for wallet
     DOGECHAIN_CONFIG: {
         chainId: '0x7D0',
         chainName: 'Dogechain Mainnet',
