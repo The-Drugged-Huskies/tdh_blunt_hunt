@@ -132,7 +132,11 @@ class LeaderboardService {
         if (!info) return null;
 
         const now = Date.now();
+        const timeLeft = info.endTime - now;
+        console.log(`[PayoutCheck] Now: ${new Date(now).toISOString()} | End: ${new Date(info.endTime).toISOString()} | Left: ${timeLeft}ms`);
+
         if (now >= info.endTime) {
+            console.warn("⚠️ Payout Condition MET! Prompting user...");
             // Further check if there are winners... logic from original wallet.js
             // Keeping it simple for now, the caller handles the UI modal logic
             return { needsPayout: true, pot: info.pot };

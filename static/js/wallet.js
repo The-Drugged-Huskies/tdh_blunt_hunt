@@ -46,7 +46,7 @@ function initWalletUI() {
     if (disconnectBtn) {
         disconnectBtn.addEventListener('click', () => {
             wm.disconnect();
-            togglePopup();
+            // togglePopup(); // Handled by updateUI logic when account becomes null
         });
     }
 
@@ -179,9 +179,14 @@ window.checkAndTriggerPayout = async () => {
         if (!status) return;
 
         if (status.needsPayout) {
+            let msg = "Round ended! Distribute the prizes and restart?";
+            if (parseFloat(status.pot) === 0) {
+                msg = "Round ended! No winners! Restart round?";
+            }
+
             // Logic from original: Ask user to distribute
             const confirm = await window.showCustomModal(
-                "Round ended! Distribute prize pool?",
+                msg,
                 true
             );
             if (confirm) {
