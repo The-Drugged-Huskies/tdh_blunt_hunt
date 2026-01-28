@@ -1,4 +1,4 @@
-# ☁️ Vercel Deployment Guide v0.79
+# ☁️ Vercel Deployment Guide v0.8
 
 Deploying your Python/Flask backend and frontend to Vercel is easy.
 
