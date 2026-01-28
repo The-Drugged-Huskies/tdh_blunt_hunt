@@ -243,23 +243,6 @@ class Game {
             });
         }
 
-        // Leaderboard Pagination
-        this.leaderboardPage = 0;
-        this.leaderboardData = [];
-        this.itemsPerPage = 10;
-
-        this.prevPageBtn = document.getElementById('prev-page-btn');
-        this.nextPageBtn = document.getElementById('next-page-btn');
-
-        if (this.prevPageBtn) this.prevPageBtn.addEventListener('click', () => this.changeLeaderboardPage(-1));
-        if (this.nextPageBtn) this.nextPageBtn.addEventListener('click', () => this.changeLeaderboardPage(1));
-
-        // Leaderboard Tabs
-        const tabHourly = document.getElementById('tab-hourly');
-        const tabAllTime = document.getElementById('tab-alltime');
-        if (tabHourly) tabHourly.addEventListener('click', () => this.switchLeaderboardTab('hourly'));
-        if (tabAllTime) tabAllTime.addEventListener('click', () => this.switchLeaderboardTab('alltime'));
-
         // Pot Polling
         this.initPotPolling();
 

@@ -312,8 +312,8 @@ contract Leaderboard is Ownable {
      * @notice Distributes the prize pool to the winner of the current round.
      * @dev Triggered on game start or score submission if the time window has passed.
      *      - Pays out 100% of pot to Rank #1.
-     *      - Resets `leaderboard` (Tournament).
-     *      - Preserves `allTimeLeaderboard` (History).
+     *      - Resets 'leaderboard' (Tournament).
+     *      - Preserves 'allTimeLeaderboard' (History).
      */
     function distributePrize() public {
         if (block.timestamp >= gameEndTime) {

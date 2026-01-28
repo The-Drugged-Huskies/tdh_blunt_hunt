@@ -4,7 +4,7 @@
  */
 const GameConfig = {
     // The deployed Leaderboard Contract Address
-    LEADERBOARD_CONTRACT_ADDRESS: "0xd9a16c4B00BDFeC1e0E2691266E31Dd2794d9F09",
+    LEADERBOARD_CONTRACT_ADDRESS: "0x5cCDc14eAF64bdcf3Cbf9381414aB4F8d9340aa1",
 
     // Game Version
     GAME_VERSION: "0.79",

@@ -58,7 +58,14 @@ def sign_score():
             # eth_account usually wants 0x for hex strings.
             private_key = "0x" + private_key
 
-        data = request.json
+        # Validate JSON content
+        if not request.is_json:
+             return jsonify({"success": False, "error": "Content-Type must be application/json"}), 415
+
+        data = request.get_json(silent=True)
+        if not data:
+            return jsonify({"success": False, "error": "Invalid JSON body"}), 400
+
         player = data.get('player')
         try:
             score = int(data.get('score'))
