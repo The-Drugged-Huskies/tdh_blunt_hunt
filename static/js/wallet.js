@@ -200,4 +200,62 @@ window.checkAndTriggerPayout = async () => {
 }
 
 // Start
+
+/**
+ * Shows the custom modal/dialog.
+ * @param {string} message - The message to display.
+ * @param {boolean} isConfirmation - If true, shows Cancel button.
+ * @param {string} title - The title of the modal.
+ * @returns {Promise<boolean>} - Resolves true if OK clicked, false if Cancelled.
+ */
+window.showCustomModal = (message, isConfirmation = false, title = "NOTICE") => {
+    return new Promise((resolve) => {
+        const modal = document.getElementById('custom-modal');
+        const titleEl = document.getElementById('modal-title');
+        const msgEl = document.getElementById('modal-message');
+        const okBtn = document.getElementById('modal-ok-btn');
+        const cancelBtn = document.getElementById('modal-cancel-btn');
+
+        if (!modal || !titleEl || !msgEl || !okBtn) {
+            console.error("Modal elements missing in DOM");
+            // Fallback to native alert/confirm
+            if (isConfirmation) {
+                resolve(confirm(message));
+            } else {
+                alert(message);
+                resolve(true);
+            }
+            return;
+        }
+
+        titleEl.innerText = title;
+        msgEl.innerText = message;
+
+        if (isConfirmation) {
+            cancelBtn.classList.remove('hidden');
+        } else {
+            cancelBtn.classList.add('hidden');
+        }
+
+        modal.classList.remove('hidden');
+
+        // One-time event listeners helper
+        const cleanup = () => {
+            okBtn.onclick = null;
+            cancelBtn.onclick = null;
+            modal.classList.add('hidden');
+        };
+
+        okBtn.onclick = () => {
+            cleanup();
+            resolve(true);
+        };
+
+        cancelBtn.onclick = () => {
+            cleanup();
+            resolve(false);
+        };
+    });
+};
+
 window.addEventListener('DOMContentLoaded', initWalletUI);
