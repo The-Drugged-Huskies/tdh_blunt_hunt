@@ -1,4 +1,4 @@
-# 👑 Admin Dashboard Manual v0.69
+# 👑 Admin Dashboard Manual v0.79
 
 Access the dashboard at: `http://localhost:5000/withdraw`
 

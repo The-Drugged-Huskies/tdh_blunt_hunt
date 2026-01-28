@@ -1,8 +1,8 @@
 # 🕵️ Supervisor Code Audit & Improvement Plan
 
 **Status**: 🟢 Operational (Deployed)
-**Version**: 0.70 (Polished)
-**Date**: 2026-01-25
+**Version**: 0.79
+**Date**: 2026-01-28
 
 After inspecting the current codebase (`app.py`, `Leaderboard.sol`, `game.js`, `wallet.js`), I have compiled the following list of critical fixes, architectural improvements, and polish items.
 
@@ -21,16 +21,12 @@ After inspecting the current codebase (`app.py`, `Leaderboard.sol`, `game.js`, `
 ## 🛠 2. Architecture & Code Quality
 
 - [x] **Monolithic `game.js`** (High Priority):
-  - **Issue**: The `Game` class is ~1500 lines. It handles Rendering, Physics, Input, UI, and Audio calls.
-  - **Fix**: Refactor into modules:
-    - `src/entities/Husky.js`
-    - `src/entities/Slingshot.js`
-    - `src/systems/Physics.js`
-    - `src/ui/Hud.js`
+  - **Status**: COMPLETED. `Game` class has been partially modularized.
+  - **Details**: Entities (`Husky.js`, `Slingshot.js`, `Blunt.js`, `Particle.js`) have been moved to `static/js/entities/`.
 - [x] **Leaderboard Pagination**:
   - **Status**: IMPLEMENTED. Logic exists and UI arrows are now plainly visible and functional.
 - [x] **Code Cleanup**:
-  - **Status**: DONE (v0.70). Unused CSS (`.faq-content.hidden`), placeholder images, and erratic bounce logic removed.
+  - **Status**: CONTINUOUS. Unused CSS (`.faq-content.hidden`), placeholder images, and erratic bounce logic removed.
 
 ## 🚀 3. UX & Polish
 
@@ -50,7 +46,7 @@ After inspecting the current codebase (`app.py`, `Leaderboard.sol`, `game.js`, `
 
 ---
 
-### Recommended Immediate Actions (Next Session)
+### Recommended Next Actions
 
-1. **Refactor Game.js**: Start splitting the massive file. This will make adding new features (like power-ups or new enemy types) much easier.
-2. **Auto-Pay Prompt**: Implement the "Payment Flow Improvement" mentioned above.
+1. **Verify Contract**: Ensure the deployed `Leaderboard.sol` is verified on the block explorer for user trust.
+2. **Mobile Controls**: Further refine touch interactions for mobile players (e.g., virtual joystick).

@@ -1,4 +1,6 @@
 {
+  "name": "tdh-blunt-hunt",
+  "version": "0.79",
   "dependencies": {
     "@openzeppelin/contracts": "^5.4.0"
   }
