@@ -35,9 +35,22 @@ A browser-based physics game where you hunt huskies with blunts, featuring an on
 
     Access at `http://localhost:5000`.
 
-## 🎮 How to Play
+## 📜 Smart Contract Deployment
 
-1. Connect Dogechain Wallet.
-2. Pay 1 DOGE to buy a "Ticket".
-3. Drag and shoot blunts at huskies to score points.
-4. Submit score to the leaderboard (requires signature).
+If you change the contract, you must redeploy it:
+
+1. **Access the Deploy Tool**:
+    * Navigate to `http://localhost:5000/deploy`.
+
+2. **Connect Wallet**:
+    * Click "Connect Wallet" (ensure you are on Dogechain).
+    * *Note: Only the Owner can successfully deploy specific admin configurations if hardcoded, but generally anyone can deploy a fresh instance.*
+
+3. **Deploy**:
+    * Click "Deploy Contract".
+    * Wait for Metamask confirmation.
+
+4. **Update Config**:
+    * Copy the **New Contract Address** from the log.
+    * Update `static/js/config.js` with the new address.
+    * Restart the backend server.

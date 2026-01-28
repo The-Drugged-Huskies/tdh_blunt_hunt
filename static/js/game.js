@@ -25,7 +25,8 @@ class Game {
         const verSpan = document.getElementById('game-version');
         if (verSpan) verSpan.innerText = `v${this.version}`;
 
-        console.log(`Initializing Blunt Hunt v${this.version}`);
+        // Initialize Game System (Pixel Art Mode)
+        console.log(`[${new Date().toISOString()}] Initializing Blunt Hunt v${this.version} (Dogechain)`);
 
         // --- iOS Detection Message ---
         const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||

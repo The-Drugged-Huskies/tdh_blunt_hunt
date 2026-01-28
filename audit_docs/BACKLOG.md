@@ -16,8 +16,9 @@ Derived from Technical Audit (2026-01-28).
 
 ## 📱 Mobile & Validation
 
-- [ ] **Contract Verification**:
-  - Verify source code on Dogechain Explorer after redeploy.
+- [ ] **Contract Verification (No Deploy Needed)**:
+  - Verify source code on Dogechain Explorer to publish Natspec comments.
+  - *Note: Do not redeploy. Use the current `Leaderboard.sol` to verify the existing address.*
 
 ## 🛠 Technical
 

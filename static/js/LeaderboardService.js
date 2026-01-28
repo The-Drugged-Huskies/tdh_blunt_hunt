@@ -1,6 +1,10 @@
 /**
  * LeaderboardService.js
- * Handles all interactions with the Leaderboard Smart Contract.
+ * Service layer for interacting with the Leaderboard Scmart Contract.
+ * Handles:
+ * - Data fetching (Rankings, Pot Info)
+ * - Transactions (Start Game, Submit Score, Pay Entry)
+ * - Payout Checks
  */
 class LeaderboardService {
     constructor() {

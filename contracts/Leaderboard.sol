@@ -161,7 +161,17 @@ contract Leaderboard is Ownable {
         uint256 timestamp;
     }
 
+    /**
+     * @notice Tournament Leaderboard (Resets every round)
+     * Stores scores for the current prize interval. Cleared on payout.
+     */
     Score[] public leaderboard;
+
+    /**
+     * @notice All-Time Leaderboard (Persistent)
+     * Stores historical high scores. Never cleared.
+     * Added in v2 to track long-term player performance.
+     */
     Score[] public allTimeLeaderboard;
 
     uint256 constant MAX_LEADERBOARD_SIZE = 100;
@@ -288,6 +298,13 @@ contract Leaderboard is Ownable {
         signerAddress = _signer;
     }
 
+    /**
+     * @notice Distributes the prize pool to the winner of the current round.
+     * @dev Triggered on game start or score submission if the time window has passed.
+     *      - Pays out 100% of pot to Rank #1.
+     *      - Resets `leaderboard` (Tournament).
+     *      - Preserves `allTimeLeaderboard` (History).
+     */
     function distributePrize() public {
         if (block.timestamp >= gameEndTime) {
             uint256 amount = prizePool;
