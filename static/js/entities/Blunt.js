@@ -8,6 +8,11 @@ class Blunt {
         this.lifetime = lifetime;
         this.baseY = y;
 
+        // Optimization: Pre-render Gold Texture if not exists
+        if (!Blunt.goldTexture && this.game.assets['blunt']) {
+            Blunt.createGoldTexture(this.game.assets['blunt']);
+        }
+
         this.sprite = new Sprite({
             image: this.game.assets['blunt']
         });
@@ -89,28 +94,50 @@ class Blunt {
         ctx.save();
         ctx.globalAlpha = Math.max(0, alpha);
 
-        this.sprite.draw(ctx, this.x, this.y, 60, 60, 0); // Slight larger
+        if (this.type === 'gold' && Blunt.goldTexture) {
+            // Draw the cached Gold Texture
+            const w = 60;
+            const h = 60;
+            ctx.drawImage(Blunt.goldTexture, this.x - w / 2, this.y - h / 2, w, h);
 
-        // Overlay for special types
-        if (this.type === 'gold') {
-            ctx.globalCompositeOperation = 'source-atop'; // Tint? or just draw circle
-            ctx.fillStyle = 'rgba(255, 215, 0, 0.3)';
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, 30, 0, Math.PI * 2);
-            ctx.fill();
-            // Sparkle effect?
+            // Simple sparkle (can stay procedural as it is sparse)
             if (Math.random() < 0.2) {
                 ctx.fillStyle = '#fff';
                 ctx.fillRect(this.x + (Math.random() - 0.5) * 40, this.y + (Math.random() - 0.5) * 40, 4, 4);
             }
-        } else if (this.type === 'armored') {
-            ctx.fillStyle = 'rgba(100, 100, 100, 0.4)';
-            ctx.beginPath();
-            ctx.arc(this.x, this.y, 30, 0, Math.PI * 2);
-            ctx.fill();
-            // Draw HP indicator if damaged?
+
+        } else {
+            // Standard Draw
+            this.sprite.draw(ctx, this.x, this.y, 60, 60, 0);
+
+            if (this.type === 'armored') {
+                ctx.fillStyle = 'rgba(100, 100, 100, 0.4)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, 30, 0, Math.PI * 2);
+                ctx.fill();
+            }
         }
 
         ctx.restore();
+    }
+
+    static createGoldTexture(sourceImage) {
+        const canvas = document.createElement('canvas');
+        canvas.width = sourceImage.width;
+        canvas.height = sourceImage.height;
+        const ctx = canvas.getContext('2d');
+
+        // Draw Base
+        ctx.drawImage(sourceImage, 0, 0);
+
+        // Apply Gold Tint
+        ctx.globalCompositeOperation = 'source-atop';
+        ctx.fillStyle = 'rgba(255, 215, 0, 0.5)'; // Gold transparency
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // Reset
+        ctx.globalCompositeOperation = 'source-over';
+
+        Blunt.goldTexture = canvas;
     }
 }

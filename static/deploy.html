@@ -239,7 +239,10 @@ contract Leaderboard is Ownable {
     }
 
     Score[] public leaderboard;
+    Score[] public allTimeLeaderboard;
+
     uint256 constant MAX_LEADERBOARD_SIZE = 100;
+    uint256 constant MAX_ALL_TIME_SIZE = 100;
 
     // Game Config
     uint256 public gameCost = 1 ether; // 1 DOGE
@@ -333,18 +336,26 @@ contract Leaderboard is Ownable {
 
         distributePrize();
 
-        uint256 length = leaderboard.length;
-        if (length < MAX_LEADERBOARD_SIZE) {
-            _insertScore(_score);
+        // 1. Update Tournament Leaderboard (Resets)
+        _updateLeaderboard(leaderboard, _score, MAX_LEADERBOARD_SIZE);
+
+        // 2. Update All-Time Leaderboard (Persistent)
+        _updateLeaderboard(allTimeLeaderboard, _score, MAX_ALL_TIME_SIZE);
+    }
+    
+    // Generic Helper
+    function _updateLeaderboard(Score[] storage _list, uint256 _score, uint256 _maxSize) internal {
+        uint256 length = _list.length;
+        if (length < _maxSize) {
+            _insertScore(_list, _score);
             return;
         }
 
-        if (_score > leaderboard[length - 1].score) {
-            leaderboard.pop();
-            _insertScore(_score);
+        if (_score > _list[length - 1].score) {
+            _list.pop();
+            _insertScore(_list, _score);
         }
     }
-    
 
     function setGameRoundDuration(uint256 _duration) external onlyOwner {
         gameRoundDuration = _duration;
@@ -362,7 +373,7 @@ contract Leaderboard is Ownable {
                 address winner = leaderboard[0].player;
                 
                 prizePool = 0;
-                delete leaderboard;
+                delete leaderboard; // Clears TOURNAMENT board
                 
                 // Align to next strict schedule
                 gameEndTime = calculateNextEndTime(); 
@@ -373,25 +384,24 @@ contract Leaderboard is Ownable {
                     emit PrizePaid(winner, amount, block.timestamp);
                 }
             } else {
-                // No entries, just reset timer
                 gameEndTime = calculateNextEndTime();
             }
         }
     }
 
-    function _insertScore(uint256 _score) internal {
-        uint256 length = leaderboard.length;
-        leaderboard.push(Score({
+    function _insertScore(Score[] storage _list, uint256 _score) internal {
+        uint256 length = _list.length;
+        _list.push(Score({
             player: msg.sender,
             score: _score,
             timestamp: block.timestamp
         }));
 
         for (uint256 i = length; i > 0; i--) {
-            if (leaderboard[i].score > leaderboard[i - 1].score) {
-                Score memory temp = leaderboard[i];
-                leaderboard[i] = leaderboard[i - 1];
-                leaderboard[i - 1] = temp;
+            if (_list[i].score > _list[i - 1].score) {
+                Score memory temp = _list[i];
+                _list[i] = _list[i - 1];
+                _list[i - 1] = temp;
             } else {
                 break;
             }
@@ -400,6 +410,10 @@ contract Leaderboard is Ownable {
 
     function getLeaderboard() external view returns (Score[] memory) {
         return leaderboard;
+    }
+
+    function getAllTimeLeaderboard() external view returns (Score[] memory) {
+        return allTimeLeaderboard;
     }
 
     function getLowestQualifyingScore() external view returns (uint256) {
@@ -415,8 +429,6 @@ contract Leaderboard is Ownable {
 
     function setGameInterval(uint256 _interval) external onlyOwner {
         gameInterval = _interval;
-        // Optional: Reset end time immediately based on new interval? 
-        // No, let user call setGameEndTime or wait for next round.
     }
     
     function setHelperAlignment(uint256 _offset) external onlyOwner {
@@ -432,11 +444,11 @@ contract Leaderboard is Ownable {
     }
 
     function forceEndedState() external onlyOwner {
-        gameEndTime = block.timestamp; // Expire immediately
+        gameEndTime = block.timestamp; 
     }
 
     function recoverFunds() external onlyOwner {
-        prizePool = 0; // Reset internal counter to match empty wallet
+        prizePool = 0; 
         (bool success, ) = payable(owner()).call{value: address(this).balance}("");
         require(success, "Transfer failed");
     }

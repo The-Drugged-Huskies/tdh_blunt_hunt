@@ -113,7 +113,7 @@ class Game {
         // Scaler.js handles the DOM transform.
         // We just ensure the canvas is correct.
         this.initDOM(); // Initialize DOM references
-        // window.addEventListener('resize', () => this.resize()); // Legacy resize removed
+        // window.addEventListener('resize', () => this.resize());
 
         // Screen Shake
         this.gameContainer = document.getElementById('game-container');
@@ -450,7 +450,7 @@ class Game {
         this.husky = null;
         this.husky = null;
 
-        // Auto-Fullscreen removed (using Force Landscape instead)
+
 
         this.isRunning = true;
         this.hits = 0; // Total hits (visual dots)

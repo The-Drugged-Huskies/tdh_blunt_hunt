@@ -1,4 +1,4 @@
-# Blunt Hunt v0.69 - Developer User Guide
+# Blunt Hunt v0.78 - Developer User Guide
 
 This document contains internal development notes, deployment instructions, and maintenance details for **Blunt Hunt**.
 
