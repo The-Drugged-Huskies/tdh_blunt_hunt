@@ -1,7 +1,7 @@
 # Architecture Documentation
 
 **Project:** TDH_BLUNT_HUNT
-**Version:** v0.8
+**Version:** v0.81
 
 ## 1. System Overview
 

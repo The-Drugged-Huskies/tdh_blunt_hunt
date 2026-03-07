@@ -1,4 +1,4 @@
-# Blunt Hunt v0.8
+# Blunt Hunt v0.81
 
 **Blunt Hunt** is a retro-style arcade game built for **Dogechain**, inspired by classic NES shooters. Launch a flying Husky from a physics-based slingshot to catch "Blunts" flying through the air!
 
