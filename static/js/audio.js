@@ -171,7 +171,7 @@ class AudioManager {
             'Bb': 233.08
         };
 
-        console.log(`Music Initialized: MOOD=${this.mode}, STYLE=${this.progStyleName}, BPM=${this.tempo}, ROOT=${this.rootFreq}`);
+        // Music Initialized
 
         this.lookahead = 25.0;
         this.scheduleAheadTime = 0.1;
@@ -188,7 +188,7 @@ class AudioManager {
         if (this.keyFrequencies[keyName]) {
             this.currentKey = keyName;
             this.rootFreq = this.keyFrequencies[keyName];
-            console.log(`Key Changed to: ${keyName} (${this.rootFreq}Hz)`);
+            // Key Changed
             this.generateComposition(); // Regenerate music with new key
         }
     }
@@ -329,7 +329,7 @@ class AudioManager {
 
         const bassStyles = ['sparse', 'deep', 'dub'];
         const style = bassStyles[Math.floor(Math.random() * bassStyles.length)];
-        console.log(`- GENERATING ${type.toUpperCase()}: Bass Style = ${style}`);
+        // Bass Generation log removed
 
         // MOTIF Application
         // Generate one good motif for this entire section

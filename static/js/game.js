@@ -26,7 +26,7 @@ class Game {
         if (verSpan) verSpan.innerText = `v${this.version}`;
 
         // Initialize Game System (Pixel Art Mode)
-        console.log(`[${new Date().toISOString()}] Initializing Blunt Hunt v${this.version} (Dogechain)`);
+        // Initialize Blunt Hunt
 
         // --- iOS Detection Message ---
         const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
@@ -421,7 +421,7 @@ class Game {
                         // We could block here, but maybe allow play and fail signature later?
                         // Let's at least log it.
                     } else {
-                        console.log("Backend Session Started for:", account);
+                        // Backend Session Started
                     }
                 }
 
@@ -959,7 +959,7 @@ class Game {
         // Optimization: checking every 4th or 8th pixel is usually enough effectively
         for (let i = 3; i < pData.length; i += 16) { // Check every 4th pixel (i += 4 * 4)
             if (pData[i] > 0) {
-                console.log(`[PixelHit] Hit at index ${i}, Alpha: ${pData[i]}`);
+                // PixelHit log removed
                 return true;
             }
         }

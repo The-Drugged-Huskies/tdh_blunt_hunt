@@ -189,7 +189,7 @@
             const el = document.getElementById('status');
             el.innerText = msg;
             el.className = type;
-            console.log(msg);
+            // log message
         }
 
         async function updateBalances(addr) {
@@ -237,7 +237,7 @@
                     const dur = await contract.gameRoundDuration();
                     document.getElementById('curRoundDuration').innerText = dur.toString();
                 } catch (e) {
-                    console.log("Round duration fetch failed (old contract?)");
+                    // fetch failed
                 }
 
                 // Signer
@@ -504,19 +504,18 @@
 
         // 8. Security: Set Signer
         document.getElementById('setSignerBtn').addEventListener('click', async () => {
-            console.log("Set Signer button clicked!");
+            // Signer update clicked
             if (!contract) {
                 console.error("Contract not initialized!");
                 return;
             }
             try {
                 const val = document.getElementById('signerInput').value;
-                console.log("Input address:", val);
                 if (!ethers.utils.isAddress(val)) return alert("Invalid Address");
 
                 log(`Setting Signer Address to ${val}...`, "success");
                 const tx = await contract.setSignerAddress(val);
-                console.log("Transaction sent:", tx.hash);
+                // tx sent
                 await tx.wait();
                 log(`Signer Updated! The contract will now REJECT scores not signed by this address.`, "success");
                 updateSettings();

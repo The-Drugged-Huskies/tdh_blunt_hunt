@@ -136,8 +136,7 @@ class LeaderboardService {
                 return { success: false, reason: "SIGNATURE_FAILED" };
             }
 
-            console.log("✅ Signature Received:", sigData.signature);
-            console.log("📝 Submitting to Contract...");
+            // Signature Received
 
             const tx = await contract.submitScore(score, sigData.signature);
             await tx.wait();
@@ -159,7 +158,7 @@ class LeaderboardService {
 
         const now = Date.now();
         const timeLeft = info.endTime - now;
-        console.log(`[PayoutCheck] Now: ${new Date(now).toISOString()} | End: ${new Date(info.endTime).toISOString()} | Left: ${timeLeft}ms`);
+        // Payout check status
 
         if (now >= info.endTime) {
             console.warn("⚠️ Payout Condition MET! Prompting user...");

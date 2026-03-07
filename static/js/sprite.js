@@ -23,7 +23,7 @@ class AssetLoader {
             img.onload = () => {
                 this.loadedCount++;
                 this.assets[key] = img;
-                console.log(`Loaded asset: ${key}`);
+                // Asset Loaded
                 resolve(img);
             };
             img.onerror = (e) => {

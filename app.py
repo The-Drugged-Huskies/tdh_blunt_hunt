@@ -84,7 +84,6 @@ def sign_score():
         private_key = os.getenv('SIGNER_PRIVATE_KEY')
         
         if not private_key:
-            print("Error: SIGNER_PRIVATE_KEY not found in env or env.json")
             return jsonify({"success": False, "error": "Signer not configured"}), 500
             
         # Clean the key
@@ -112,7 +111,6 @@ def sign_score():
         is_cheater = data.get('cheater', False)
 
         if is_cheater:
-             print(f"⚠️ Cheater detected: {player} attempted to submit score {score}")
              return jsonify({"success": False, "error": "Score tampering detected. Request denied."}), 403
 
         if not player or not contract_addr:
@@ -173,7 +171,6 @@ def sign_score():
         return jsonify({"success": True, "signature": sig})
 
     except Exception as e:
-        print(f"Sign Error: {e}")
         return jsonify({"success": False, "error": str(e)}), 500
 
 

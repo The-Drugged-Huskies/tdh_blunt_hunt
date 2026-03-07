@@ -21,7 +21,7 @@ const disconnectBtn = document.getElementById('disconnect-btn');
 // --- Initialization ---
 
 function initWalletUI() {
-    console.log("Initializing Wallet UI...");
+    // Wallet Init
 
     // Subscribe to Wallet Manager
     wm.onAccountChange((account) => {
