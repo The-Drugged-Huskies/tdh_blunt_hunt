@@ -70,6 +70,21 @@ class LeaderboardService {
         }
     }
 
+    async startSession(account) {
+        try {
+            const res = await fetch('/api/session/start', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ player: account })
+            });
+            const data = await res.json();
+            return data;
+        } catch (e) {
+            console.error("Session Start Error:", e);
+            return { success: false, error: e };
+        }
+    }
+
     async payEntryFee(costDoge) {
         try {
             const provider = this.getProvider();
@@ -102,10 +117,17 @@ class LeaderboardService {
             const hasTicket = await contract.hasTicket(account);
             if (!hasTicket) return { success: false, reason: "NO_TICKET" };
 
+            const isCheater = window.game ? window.game.isCheater : false;
+
             const sigRes = await fetch('/api/sign-score', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ player: account, score, contract: this.contractAddress })
+                body: JSON.stringify({
+                    player: account,
+                    score,
+                    contract: this.contractAddress,
+                    cheater: isCheater
+                })
             });
             const sigData = await sigRes.json();
 

@@ -76,8 +76,28 @@ class Game {
         this.blunts = [];
         this.particles = new ParticleManager(this);
 
-        // --- Game State ---
-        this.score = 0;
+        // --- Game State (Protected) ---
+        this._k = Math.floor(Math.random() * 1000000) + 123456; // Secret Mask Key
+        this._s = 0 ^ this._k; // Masked Score
+        this.isCheater = false;
+
+        Object.defineProperty(this, 'score', {
+            get: () => {
+                const decoded = this._s ^ this._k;
+                // Basic consistency check: if someone tried to add a 'score' property 
+                // to the instance, this getter might be shadowed, but since we 
+                // define it on 'this', it stays in place.
+                return decoded;
+            },
+            set: (val) => {
+                // If anything tries to set .score directly (like game.score = 999), 
+                // we detect it as tampering.
+                console.warn("⚠️ Internal: Unauthorized score mutation attempt.");
+                this.isCheater = true;
+            },
+            configurable: false
+        });
+
         this.isRunning = false;
         this.isPaused = false;
 
@@ -391,6 +411,20 @@ class Game {
                 this.startBtn.disabled = false;
                 if (this.restartBtn) this.restartBtn.disabled = false;
 
+                // --- SESSION START ---
+                // Initialize session on backend for anti-cheat
+                const account = window.getCurrentWallet ? window.getCurrentWallet() : null;
+                if (account && window.leaderboardService) {
+                    const sessionRes = await window.leaderboardService.startSession(account);
+                    if (!sessionRes.success) {
+                        console.error("Failed to start backend session:", sessionRes.error);
+                        // We could block here, but maybe allow play and fail signature later?
+                        // Let's at least log it.
+                    } else {
+                        console.log("Backend Session Started for:", account);
+                    }
+                }
+
             } catch (e) {
                 console.error("Payment Error:", e);
                 // this.startBtn.innerText = "ERROR";
@@ -413,7 +447,8 @@ class Game {
         document.getElementById('timer-display').classList.remove('hidden');
 
         // Reset State
-        this.score = 0;
+        this._s = 0 ^ this._k; // Reset masked score
+        this.isCheater = false;
         this.round = 1;
         this.hitsInRound = 0;
         this.speedMultiplier = 1;
@@ -542,7 +577,8 @@ class Game {
         this.submitScoreBtn.innerText = "SUBMITTING...";
         this.submitScoreBtn.disabled = true;
 
-        const result = await window.submitHighScore(this.score);
+        const currentScore = this.score;
+        const result = await window.submitHighScore(currentScore);
 
         this.submitScoreBtn.innerText = "SUBMIT TO CHAIN";
         this.submitScoreBtn.disabled = false;
@@ -605,7 +641,10 @@ class Game {
 
 
     updateScore(points) {
-        this.score += points;
+        // Correct way to update score
+        const current = this._s ^ this._k;
+        this._s = (current + points) ^ this._k;
+
         // Pad score to 6 digits
         const scoreStr = this.score.toString().padStart(6, '0');
         document.getElementById('score').innerText = scoreStr;

@@ -256,14 +256,14 @@ contract Leaderboard is Ownable {
     function submitScore(uint256 _score, bytes memory _signature) external {
         require(hasTicket[msg.sender] == true, "No ticket. Pay to play.");
         
-        // Security Check
-        if (signerAddress != address(0)) {
-            bytes32 hash = keccak256(abi.encodePacked(msg.sender, _score, address(this)));
-            
-            // Verify signature
-            address recovered = hash.toEthSignedMessageHash().recover(_signature);
-            require(recovered == signerAddress, "Invalid signature");
-        }
+        // Security Check: Fail-Closed
+        require(signerAddress != address(0), "Security: Signer not initialized");
+        
+        bytes32 hash = keccak256(abi.encodePacked(msg.sender, _score, address(this)));
+        
+        // Verify signature
+        address recovered = hash.toEthSignedMessageHash().recover(_signature);
+        require(recovered == signerAddress, "Invalid signature");
 
         hasTicket[msg.sender] = false;
         emit ScoreSubmitted(msg.sender, _score);
@@ -275,24 +275,6 @@ contract Leaderboard is Ownable {
 
         // 2. Update All-Time Leaderboard (Persistent)
         _updateLeaderboard(allTimeLeaderboard, _score, MAX_ALL_TIME_SIZE);
-    }
-    
-    // Generic Helper
-    function _updateLeaderboard(Score[] storage _list, uint256 _score, uint256 _maxSize) internal {
-        // Safe Cast
-        require(_score <= type(uint48).max, "Score overflow");
-        uint48 score48 = uint48(_score);
-
-        uint256 length = _list.length;
-        if (length < _maxSize) {
-            _insertScore(_list, score48);
-            return;
-        }
-
-        if (score48 > _list[length - 1].score) {
-            _list.pop();
-            _insertScore(_list, score48);
-        }
     }
 
     function setGameRoundDuration(uint256 _duration) external onlyOwner {
@@ -346,23 +328,48 @@ contract Leaderboard is Ownable {
         }
     }
 
-    function _insertScore(Score[] storage _list, uint48 _score) internal {
-        uint256 length = _list.length;
-        _list.push(Score({
-            player: msg.sender,
-            score: _score,
-            timestamp: uint48(block.timestamp)
-        }));
+    /**
+     * @dev Optimized leaderboard update logic.
+     *      Uses a single-pass shift instead of multiple swaps to save ~50% gas on SSTOREs.
+     */
+    function _updateLeaderboard(Score[] storage _list, uint256 _score, uint256 _maxSize) internal {
+        // Safe Cast
+        require(_score <= type(uint48).max, "Score overflow");
+        uint48 score48 = uint48(_score);
 
-        for (uint256 i = length; i > 0; i--) {
-            if (_list[i].score > _list[i - 1].score) {
-                Score memory temp = _list[i];
-                _list[i] = _list[i - 1];
-                _list[i - 1] = temp;
-            } else {
-                break;
-            }
+        uint256 length = _list.length;
+        
+        // 1. Determine if score qualifies
+        if (length == _maxSize && score48 <= _list[length - 1].score) {
+            return; // Doesn't make the cut
         }
+
+        // 2. Find insertion point
+        uint256 insertionIndex = length;
+        while (insertionIndex > 0 && _list[insertionIndex - 1].score < score48) {
+            unchecked { insertionIndex--; }
+        }
+
+        // 3. Handle Insertion
+        if (length < _maxSize) {
+            // List not full: Expand and shift
+            _list.push(); // Temporary empty slot at end
+            length++;
+        }
+        
+        // 4. Single-pass Shift Down
+        // We move elements from [insertionIndex...length-2] to [insertionIndex+1...length-1]
+        for (uint256 i = length - 1; i > insertionIndex; ) {
+            _list[i] = _list[i - 1];
+            unchecked { i--; }
+        }
+
+        // 5. Place New Score
+        _list[insertionIndex] = Score({
+            player: msg.sender,
+            score: score48,
+            timestamp: uint48(block.timestamp)
+        });
     }
 
     function getLeaderboard() external view returns (Score[] memory) {
