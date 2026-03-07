@@ -304,7 +304,7 @@ class Game {
                         timeStr = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
                     }
 
-                    potTimer.innerText = `NEXT PAYOUT: ${timeStr}`;
+                    potTimer.innerText = `TOURNAMENT ENDS: ${timeStr}`;
                     potTimer.classList.remove('hidden');
                 }
             }
