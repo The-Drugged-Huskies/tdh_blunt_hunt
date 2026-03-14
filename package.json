@@ -1,6 +1,10 @@
 {
   "name": "tdh-blunt-hunt",
   "version": "0.8",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/The-Drugged-Huskies/TDH_BLUNT_HUNT.git"
+  },
   "dependencies": {
     "@openzeppelin/contracts": "^5.4.0"
   }

@@ -2,6 +2,8 @@
 
 **Blunt Hunt** is a retro-style arcade game built for **Dogechain**, inspired by classic NES shooters. Launch a flying Husky from a physics-based slingshot to catch "Blunts" flying through the air!
 
+[**GitHub Repository**](https://github.com/The-Drugged-Huskies/TDH_BLUNT_HUNT)
+
 ---
 
 ## 📚 Documentation
