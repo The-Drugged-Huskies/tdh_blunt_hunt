@@ -1,7 +1,7 @@
 # 🕵️ Supervisor Code Audit & Improvement Plan
 
 **Status**: 🟢 Operational (Deployed)
-**Version**: 0.8
+**Version**: 0.81
 **Date**: 2026-01-28
 
 After inspecting the current codebase (`app.py`, `Leaderboard.sol`, `game.js`, `wallet.js`), I have compiled the following list of critical fixes, architectural improvements, and polish items.

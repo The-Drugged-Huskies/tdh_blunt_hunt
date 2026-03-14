@@ -26,39 +26,7 @@ class Game {
         if (verSpan) verSpan.innerText = `v${this.version}`;
 
         // Initialize Game System (Pixel Art Mode)
-        console.log(`[${new Date().toISOString()}] Initializing Blunt Hunt v${this.version} (Dogechain)`);
-
-        // --- iOS Detection Message ---
-        const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
-            (navigator.userAgent.includes("Mac") && "ontouchend" in document);
-
-        if (true) { // Always run detection check
-            const startScreen = document.getElementById('start-screen');
-            const subtitle = startScreen ? startScreen.querySelector('.subtitle') : null;
-
-            if (subtitle) {
-                // Check if message already exists to verify it works
-                let existingMsg = document.getElementById('ios-detection-msg');
-                if (!existingMsg) {
-                    const iosMsg = document.createElement('p');
-                    iosMsg.id = 'ios-detection-msg';
-
-                    if (isIOS) {
-                        iosMsg.innerText = "APPLE DEVICE DETECTED";
-                        iosMsg.style.color = '#83d313'; // Greenish
-                    } else {
-                        iosMsg.innerText = "NON-APPLE DEVICE DETECTED";
-                        iosMsg.style.color = '#209cee'; // Blueish
-                    }
-
-                    iosMsg.style.fontSize = '0.6rem';
-                    iosMsg.style.marginTop = '10px';
-                    iosMsg.style.marginBottom = '10px';
-
-                    subtitle.parentNode.insertBefore(iosMsg, subtitle.nextSibling);
-                }
-            }
-        }
+        // Initialize Blunt Hunt
 
         // Fixed VGA Resolution (Matches new 640x480 container)
         this.canvas.width = 640;
@@ -76,8 +44,28 @@ class Game {
         this.blunts = [];
         this.particles = new ParticleManager(this);
 
-        // --- Game State ---
-        this.score = 0;
+        // --- Game State (Protected) ---
+        this._k = Math.floor(Math.random() * 1000000) + 123456; // Secret Mask Key
+        this._s = 0 ^ this._k; // Masked Score
+        this.isCheater = false;
+
+        Object.defineProperty(this, 'score', {
+            get: () => {
+                const decoded = this._s ^ this._k;
+                // Basic consistency check: if someone tried to add a 'score' property 
+                // to the instance, this getter might be shadowed, but since we 
+                // define it on 'this', it stays in place.
+                return decoded;
+            },
+            set: (val) => {
+                // If anything tries to set .score directly (like game.score = 999), 
+                // we detect it as tampering.
+                console.warn("⚠️ Internal: Unauthorized score mutation attempt.");
+                this.isCheater = true;
+            },
+            configurable: false
+        });
+
         this.isRunning = false;
         this.isPaused = false;
 
@@ -285,7 +273,7 @@ class Game {
         // Initial call
         this.updatePotDisplay();
         // Poll every 10s
-        setInterval(() => this.updatePotDisplay(), 10000);
+        setInterval(() => this.updatePotDisplay(), 1000); // Update every second for smooth transition
     }
 
     async updatePotDisplay() {
@@ -316,7 +304,11 @@ class Game {
                         timeStr = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
                     }
 
-                    potTimer.innerText = `NEXT PAYOUT: ${timeStr}`;
+                    if (timeLeft <= 0) {
+                        potTimer.innerText = "TOURNAMENT ENDED!";
+                    } else {
+                        potTimer.innerText = `TOURNAMENT ENDS: ${timeStr}`;
+                    }
                     potTimer.classList.remove('hidden');
                 }
             }
@@ -391,6 +383,20 @@ class Game {
                 this.startBtn.disabled = false;
                 if (this.restartBtn) this.restartBtn.disabled = false;
 
+                // --- SESSION START ---
+                // Initialize session on backend for anti-cheat
+                const account = window.getCurrentWallet ? window.getCurrentWallet() : null;
+                if (account && window.leaderboardService) {
+                    const sessionRes = await window.leaderboardService.startSession(account);
+                    if (!sessionRes.success) {
+                        console.error("Failed to start backend session:", sessionRes.error);
+                        // We could block here, but maybe allow play and fail signature later?
+                        // Let's at least log it.
+                    } else {
+                        // Backend Session Started
+                    }
+                }
+
             } catch (e) {
                 console.error("Payment Error:", e);
                 // this.startBtn.innerText = "ERROR";
@@ -413,7 +419,8 @@ class Game {
         document.getElementById('timer-display').classList.remove('hidden');
 
         // Reset State
-        this.score = 0;
+        this._s = 0 ^ this._k; // Reset masked score
+        this.isCheater = false;
         this.round = 1;
         this.hitsInRound = 0;
         this.speedMultiplier = 1;
@@ -461,17 +468,6 @@ class Game {
         // Start Music (Safe Mode)
         try {
             this.audio.startMusic();
-
-            // Debug: Show banner on success too
-            const errBanner = document.getElementById('audio-error-message');
-            if (errBanner) {
-                errBanner.classList.remove('hidden');
-                errBanner.style.color = '#00ff00';
-                errBanner.style.borderColor = '#00ff00';
-                errBanner.innerText = "AUDIO INITIALIZED";
-                // Hide after 3s
-                setTimeout(() => errBanner.classList.add('hidden'), 3000);
-            }
         } catch (e) {
             console.warn("Audio start failed:", e);
             const errBanner = document.getElementById('audio-error-message');
@@ -542,7 +538,8 @@ class Game {
         this.submitScoreBtn.innerText = "SUBMITTING...";
         this.submitScoreBtn.disabled = true;
 
-        const result = await window.submitHighScore(this.score);
+        const currentScore = this.score;
+        const result = await window.submitHighScore(currentScore);
 
         this.submitScoreBtn.innerText = "SUBMIT TO CHAIN";
         this.submitScoreBtn.disabled = false;
@@ -605,7 +602,10 @@ class Game {
 
 
     updateScore(points) {
-        this.score += points;
+        // Correct way to update score
+        const current = this._s ^ this._k;
+        this._s = (current + points) ^ this._k;
+
         // Pad score to 6 digits
         const scoreStr = this.score.toString().padStart(6, '0');
         document.getElementById('score').innerText = scoreStr;
@@ -920,7 +920,7 @@ class Game {
         // Optimization: checking every 4th or 8th pixel is usually enough effectively
         for (let i = 3; i < pData.length; i += 16) { // Check every 4th pixel (i += 4 * 4)
             if (pData[i] > 0) {
-                console.log(`[PixelHit] Hit at index ${i}, Alpha: ${pData[i]}`);
+                // PixelHit log removed
                 return true;
             }
         }

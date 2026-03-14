@@ -85,7 +85,7 @@ class Scaler {
         // Expose Landscape state for Inputs
         window.IS_LANDSCAPE = this.isLandscape;
 
-        console.log(`[Scaler] Applied Scale: ${finalScaleX.toFixed(3)} (Landscape: ${this.isLandscape})`);
+        // Scaler Applied
     }
 
     toggleLandscape() {

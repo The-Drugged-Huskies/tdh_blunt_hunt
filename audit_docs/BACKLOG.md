@@ -1,6 +1,6 @@
 # 📝 Project Backlog
 
-Derived from Technical Audit (2026-01-28).
+Derived from Technical Audit (Updated Mar 2026).
 
 ## 🔥 High Priority (Security & Critical Features)
 
@@ -21,9 +21,14 @@ Derived from Technical Audit (2026-01-28).
 - [x] **Code Cleanup: Remove Duplicate Event Listeners**:
   - `game.js`: Found duplicate listeners for start/restart buttons.
   - Action: Refactor to single initialization.
-- [x] **Backend: Error Handling Review**:
-  - `app.py`: Ensure `sign_score` handles partial JSON failures gracefully.
-  - Action: Add strict schema validation.
+- [x] **Backend: Secure Score Verification (Anti-Cheat)**:
+  - **Issue**: Arbitrary score signing without session verification.
+  - **Fix**: Implemented session-based validation for score-to-time plausibility.
+- [x] **Frontend: Client-Side Score Protection (Anti-Tamper)**:
+  - **Issue**: score variable modifiable via console.
+  - **Fix**: Implemented bitwise XOR masking and protected property getters.
+- [x] **Production Hardening**:
+  - **Action**: Added `Flask-Limiter` for rate protection and disabled Flask Debug mode.
 - [x] **Cleanup**:
   - Delete `verify_signer.py`.
   - Secure/Remove `static/signer_debug.html`.
@@ -36,7 +41,7 @@ Derived from Technical Audit (2026-01-28).
 ## 🚀 Post-Deployment
 
 - [x] **Update `static/js/config.js` with New Address**:
-  - Address: `0x5cCDc14eAF64bdcf3Cbf9381414aB4F8d9340aa1`
+  - Address: `0xDeCfB1e43F4B981Cb5F1EeafFC2E11847B8Ad8A1`
 - [ ] **Verify New Contract on Explorer**:
   - **Action**: Upload `contracts/Leaderboard.sol` to Dogechain Explorer.
   - *Note: The file is already flattened and ready for "Single File" verification.*

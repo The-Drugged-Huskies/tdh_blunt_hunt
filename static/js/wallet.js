@@ -21,7 +21,7 @@ const disconnectBtn = document.getElementById('disconnect-btn');
 // --- Initialization ---
 
 function initWalletUI() {
-    console.log("Initializing Wallet UI...");
+    // Wallet Init
 
     // Subscribe to Wallet Manager
     wm.onAccountChange((account) => {
@@ -186,9 +186,9 @@ window.checkAndTriggerPayout = async () => {
         }
 
         if (status.needsPayout) {
-            let msg = "Round ended! Distribute the prizes and restart?";
+            let msg = "Tournament ended! Distribute the prizes and restart?";
             if (parseFloat(status.pot) === 0) {
-                msg = "Round ended! No winners! Restart round?";
+                msg = "Tournament ended! No winners! Restart round?";
             }
 
             // Logic from original: Ask user to distribute
@@ -198,7 +198,7 @@ window.checkAndTriggerPayout = async () => {
             );
             if (confirm) {
                 await ls.distributePrize();
-                await window.showCustomModal("Prize Distributed! Round Reset.");
+                await window.showCustomModal("Prize Distributed! Tournament Reset.");
             }
         }
 
@@ -237,6 +237,15 @@ window.showCustomModal = (message, isConfirmation = false, title = "NOTICE") => 
                 alert(message);
                 resolve(true);
             }
+            return;
+        }
+
+        // --- Gameplay Suppression ---
+        // If the game is running, we block non-essential modals to prevent 
+        // interruptions during play (e.g. from background payout checks).
+        if (window.game && window.game.isRunning) {
+            console.warn(`[UI] Modal suppressed during gameplay: "${message}"`);
+            resolve(false);
             return;
         }
 

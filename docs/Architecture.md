@@ -1,7 +1,7 @@
 # Architecture Documentation
 
 **Project:** TDH_BLUNT_HUNT
-**Version:** v0.8
+**Version:** v0.81
 
 ## 1. System Overview
 
@@ -16,7 +16,10 @@ This approach ensures sharp pixel-art rendering for gameplay while allowing acce
 
 ### Backend (Python/Flask)
 
-- `app.py`: Entry point. Serves the static files and handles API routes (e.g. `/api/highscore`).
+- `app.py`: Entry point. Serves static files and handles secure API routes:
+  - `/api/session/start`: Initializes a new game session and tracks start time.
+  - `/api/sign-score`: Verifies gameplay logic and signs the score for on-chain submission.
+- `.env`: Stores the `SIGNER_PRIVATE_KEY` used for cryptographic signing.
 
 ### Frontend (static/js)
 
@@ -45,7 +48,12 @@ This approach ensures sharp pixel-art rendering for gameplay while allowing acce
     - HTML Menu hides. HTML HUD shows.
     - Game Loop updates Physics (Entities).
     - Canvas redraws frame (~60 FPS).
-5. **Game Over**: Loop stops or switches state. HTML Game Over screen appears.
+5. **Score Signing**:
+    - Frontend requests signature from `/api/sign-score`.
+    - Backend validates session, time, and logic.
+6. **Submission**:
+    - Signed score is submitted to the Smart Contract via `LeaderboardService`.
+7. **Game Over**: HTML Game Over screen appears.
 
 ## 4. Key Design Decisions
 

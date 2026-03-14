@@ -1,4 +1,4 @@
-# Blunt Hunt
+# Blunt Hunt v0.81
 
 **Blunt Hunt** is a retro-style arcade game built for **Dogechain**, inspired by classic NES shooters. Launch a flying Husky from a physics-based slingshot to catch "Blunts" flying through the air!
 
@@ -47,7 +47,16 @@ Build your streak to maximize your score!
 
 Extend your run!
 
-- **Round Clear**: Advancing to the next round grants **+5 Seconds**.
+- **Round Clear**: Advancing to the next round (every 10 hits) grants **+5 Seconds**.
+
+---
+
+## 🔒 Security & Fair Play
+
+To ensure a fair tournament for all players:
+- **Signed Scores**: All high scores are cryptographically signed by the backend before submission.
+- **Session Validation**: Active play sessions are monitored for tampering.
+- **Expiry**: Tournament entries expire after 5 minutes of inactivity.
 
 ---
 

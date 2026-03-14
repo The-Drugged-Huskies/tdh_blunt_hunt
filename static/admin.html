@@ -68,7 +68,7 @@
 <body>
 
     <h1>ADMIN DASHBOARD</h1>
-    <p>Target Contract: <input type="text" id="contractAddrInput" value="0xB39E6E0C6674564b6f36E112458E65aE05395737"
+    <p>Target Contract: <input type="text" id="contractAddrInput" value="0xDeCfB1e43F4B981Cb5F1EeafFC2E11847B8Ad8A1"
             style="width: 350px; background: #000; color: #0f0; border: 1px solid #0f0; padding: 5px;"></p>
 
     <button id="connectBtn">1. Connect Wallet</button>
@@ -189,7 +189,7 @@
             const el = document.getElementById('status');
             el.innerText = msg;
             el.className = type;
-            console.log(msg);
+            // log message
         }
 
         async function updateBalances(addr) {
@@ -217,6 +217,7 @@
                     const fee = await contract.devFeePercent();
                     document.getElementById('curDevFee').innerText = fee.toString();
                 } catch (e) {
+                    console.warn("Dev fee fetch failed, fallback to 25. Error:", e.message);
                     document.getElementById('curDevFee').innerText = "25 (Fixed)";
                 }
 
@@ -236,7 +237,7 @@
                     const dur = await contract.gameRoundDuration();
                     document.getElementById('curRoundDuration').innerText = dur.toString();
                 } catch (e) {
-                    console.log("Round duration fetch failed (old contract?)");
+                    // fetch failed
                 }
 
                 // Signer
@@ -503,16 +504,25 @@
 
         // 8. Security: Set Signer
         document.getElementById('setSignerBtn').addEventListener('click', async () => {
-            if (!contract) return;
+            // Signer update clicked
+            if (!contract) {
+                console.error("Contract not initialized!");
+                return;
+            }
             try {
                 const val = document.getElementById('signerInput').value;
                 if (!ethers.utils.isAddress(val)) return alert("Invalid Address");
 
                 log(`Setting Signer Address to ${val}...`, "success");
                 const tx = await contract.setSignerAddress(val);
+                // tx sent
                 await tx.wait();
                 log(`Signer Updated! The contract will now REJECT scores not signed by this address.`, "success");
-            } catch (e) { log("Error: " + e.message, "error"); }
+                updateSettings();
+            } catch (e) {
+                console.error("Set Signer Error:", e);
+                log("Error: " + e.message, "error");
+            }
         });
 
     </script>

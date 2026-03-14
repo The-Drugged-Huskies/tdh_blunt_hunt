@@ -1,4 +1,4 @@
-# Blunt Hunt v0.8 - Developer User Guide
+# Blunt Hunt v0.81 - Developer User Guide
 
 This document contains internal development notes, deployment instructions, and maintenance details for **Blunt Hunt**.
 
@@ -124,17 +124,16 @@ The contract collects 25% of fees for the Dev and 75% for the Pot. The Pot pays 
 2. Connect the **Owner Wallet** (the one that deployed the contract).
 3. Click **Recover Funds** to withdraw the entire contract balance to your wallet.
 
-## 🕒 Game Schedule & Payout Mechanics
+## 🕒 Tournament Schedule & Payout Mechanics
 
-The game operates on a strict **Hourly Schedule**, ending at **Minute 42** of every hour.
+The game operates on a strict **Hourly Schedule**, typically ending at **Minute 42** of every hour (or as configured in the contract).
 
 ### 1. The Schedule (Automatic)
 
 The Smart Contract automatically calculates the deadline.
 
-- If a game starts at **14:30**, it ends at **14:42**.
-- If a game starts at **14:50**, it ends at **15:42**.
-- **Payout Time**: The moment the clock strikes **XX:42**, the round is officially Over.
+- **Tournament Ends**: The moment the clock strikes the deadline, the round is officially Over. No more scores can be submitted for that pot.
+- **Timer**: The UI displays "TOURNAMENT ENDS" to show the remaining time in the current round.
 
 ### 2. The Payout Trigger (Hybrid System)
 
@@ -179,3 +178,13 @@ All of these actions happen **simultaneously** in a single transaction:
 
 - **Start Button**: Automatically disabled until the system verifies the payout status.
 - **Seamless Reset**: Confirming a payout resets the UI and Pot *without* reloading the page.
+- **Modal Suppression**: All non-essential UI popups are suppressed during active gameplay to prevent interruptions.
+
+## 🛡️ Anti-Cheat & Security
+
+To maintain tournament integrity, several layers of protection are implemented:
+
+1. **Signed Submissions**: When a game ends, the score is sent to the backend for verification. If valid, the backend returns a cryptographic signature required by the smart contract.
+2. **Session Heartbeat**: The server tracks active game sessions. If a score is submitted without a valid, active session, it is rejected.
+3. **Time Validation**: The system ensures the game duration matches the reported score to prevent "instant" high scores.
+4. **Session Expiry**: Sessions automatically expire after 5 minutes of inactivity to prevent reused signatures.

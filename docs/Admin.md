@@ -1,4 +1,4 @@
-# 👑 Admin Dashboard Manual v0.8
+# 👑 Admin Dashboard Manual v0.81
 
 Access the dashboard at: `http://localhost:5000/withdraw`
 
@@ -30,7 +30,7 @@ When you connect your wallet, the dashboard now shows **Current Values** for all
 * **What**: How long a "Match" lasts before the Prize Pot is distributed.
 * **Options**: 1 Hour, 24 Hours, 1 Week, 30 Days.
 * **Custom**: You can enter specific seconds (e.g. `300` for 5 minutes).
-* **Effect**: Changes take effect **after the next payout**.
+* **Effect**: Changes take effect **after the tournament ends**.
 
 ### ⏱️ Timer Controls (Crucial)
 

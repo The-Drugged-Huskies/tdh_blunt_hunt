@@ -91,17 +91,15 @@
                     <!-- Start Screen -->
                     <section id="start-screen" class="overlay">
                         <h1 class="title">BLUNT HUNT</h1>
-                        <p class="subtitle" style="font-size: calc(0.9rem - 2px);">DRUGGED HUSKIES EDITION</p>
-
-
-
+                        <p class="subtitle" style="font-size: 0.9rem;">DRUGGED HUSKIES EDITION</p>
                         <!-- Pot Display -->
                         <div id="pot-display"
-                            style="color: #FFD700; font-size: 1.2rem; margin-bottom: 5px; text-shadow: 2px 2px #000;">
+                            style="color: #FFD700; font-size: 1.2rem; position: relative; top: -15px; margin-bottom: 5px; text-shadow: 2px 2px #000;">
                             POT: 0.00
                         </div>
-                        <div id="pot-timer" style="font-size: 0.7rem; color: #ccc; margin-bottom: 20px;">
-                            NEXT PAYOUT: 00:00
+                        <div id="pot-timer"
+                            style="font-size: 0.7rem; color: #ccc; margin-bottom: 20px; position: relative; top: 10px;">
+                            TOURNAMENT ENDS: 00:00
                         </div>
 
                         <!-- Flow Buttons -->
@@ -227,7 +225,7 @@
                             <div id="faq-gameplay" class="faq-content">
                                 <div class="faq-list-item">
                                     <div class="faq-question">GOAL</div>
-                                    <div>Shoot Blunts at Huskies. Earn points.</div>
+                                    <div>Launch Huskies at Blunts. Earn points.</div>
                                 </div>
                                 <div class="faq-list-item">
                                     <div class="faq-question">CONTROLS</div>
@@ -235,37 +233,50 @@
                                 </div>
                                 <div class="faq-list-item">
                                     <div class="faq-question">SCORING</div>
-                                    <div>Small Husky: 50pts<br>Big Husky: 10pts</div>
+                                    <div>Normal Blunt: 10 pts<br>Armored Blunt: 25 pts (2 hits)<br>Gold Blunt: 50 pts
+                                    </div>
+                                </div>
+                                <div class="faq-list-item">
+                                    <div class="faq-question">MULTIPLIER</div>
+                                    <div>Combo streaks increase multiplier up to 5x. Higher rounds grant even bigger
+                                        bonuses!</div>
                                 </div>
                             </div>
 
                             <!-- Rules Section (Pot + Tickets) -->
                             <div id="faq-rules" class="faq-content hidden">
-                                <!-- Pot Info -->
                                 <div class="faq-list-item">
                                     <div class="faq-question">THE POT</div>
-                                    <div>75% of fees go to Pot.<br>Winner takes all (60m).</div>
+                                    <div>75% of fees go to Pot. 25% Dev fee.</div>
                                 </div>
                                 <div class="faq-list-item">
-                                    <div class="faq-question">PAYOUT</div>
-                                    <div>Automatic smart contract transfer.</div>
+                                    <div class="faq-question">TOURNAMENT</div>
+                                    <div>Rounds last 1 hour. Highest score wins the Pot!</div>
                                 </div>
-                                <!-- Tickets Info -->
+                                <div class="faq-list-item">
+                                    <div class="faq-question">PRIZES</div>
+                                    <div>Automatic smart contract transfer to the winner's wallet.</div>
+                                </div>
                                 <div class="faq-list-item">
                                     <div class="faq-question">TICKET COST</div>
-                                    <div>1 DOGE = 1 Ticket (1 Round)</div>
+                                    <div>1 DOGE = 1 Ticket (1 Game Session)</div>
                                 </div>
                                 <div class="faq-list-item">
-                                    <div class="faq-question">VALIDITY</div>
-                                    <div>Ticket burns on score submit or round end.</div>
+                                    <div class="faq-question">SECURITY</div>
+                                    <div>Scores are cryptographically signed. Backend sessions expire after 5 mins to
+                                        prevent tampering.</div>
                                 </div>
                             </div>
 
-                            <!-- Support Section (No Roadmap) -->
+                            <!-- Support Section -->
                             <div id="faq-support" class="faq-content hidden">
                                 <div class="faq-list-item">
                                     <div class="faq-question">GREY BUTTON?</div>
-                                    <div>Wait 1-2 mins for transaction confirmation.</div>
+                                    <div>Wait 1-2 mins for blockchain confirmation.</div>
+                                </div>
+                                <div class="faq-list-item">
+                                    <div class="faq-question">INVALID SIG?</div>
+                                    <div>Your session might have expired. Restart the app if it persists.</div>
                                 </div>
                                 <div class="faq-list-item">
                                     <div class="faq-question">NO AUDIO?</div>
@@ -273,7 +284,7 @@
                                 </div>
                                 <div class="faq-list-item">
                                     <div class="faq-question">LAG?</div>
-                                    <div>Use Chrome/Brave. Close tabs.</div>
+                                    <div>Use Chrome/Brave. Close other tabs.</div>
                                 </div>
                             </div>
 
