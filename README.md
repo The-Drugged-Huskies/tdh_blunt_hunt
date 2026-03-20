@@ -2,7 +2,7 @@
 
 **Blunt Hunt** is a retro-style arcade game built for **Dogechain**, inspired by classic NES shooters. Launch a flying Husky from a physics-based slingshot to catch "Blunts" flying through the air!
 
-[**GitHub Repository**](https://github.com/The-Drugged-Huskies/TDH_BLUNT_HUNT)
+[**GitHub Repository**](https://github.com/The-Drugged-Huskies/tdh_blunt_hunt)
 
 ---
 
@@ -14,12 +14,13 @@
 - [**Admin Guide**](docs/Admin.md) - Managing the contract and tournament.
 - [**Deployment (Vercel)**](docs/Vercel.md) - Hosting the game.
 - [**Music Engine**](docs/Music.md) - How the procedural audio works.
+- [**Project Roadmap & TODO**](docs/TODO.md) - Current priorities and completed features.
 
 ---
 
 ## 🎮 How to Play
 
-**Objective**: Score as many points as possible before time runs out!
+**Objective**: Score as many points as possible before the tournament ends!
 
 ### 🎯 The Blunts
 
@@ -54,7 +55,7 @@ Extend your run!
 ## 🔒 Security & Fair Play
 
 To ensure a fair tournament for all players:
-- **Signed Scores**: All high scores are cryptographically signed by the backend before submission.
+- **Mandatory Signer**: The contract requires a signer address to be set - unsigned scores are rejected.
 - **Session Validation**: Active play sessions are monitored for tampering.
 - **Expiry**: Tournament entries expire after 5 minutes of inactivity.
 
@@ -64,15 +65,28 @@ To ensure a fair tournament for all players:
 
 - **Desktop**: Click and drag the slingshot to aim. Release to fire.
 - **Mobile**: Touch and drag to aim. Release to fire.
-- **Settings**: Click the **Gear Icon** (top right) to adjust volume or pause.
+- **Screen Rotation**: Click the ↻ button to rotate the game view 90°.
+- **Settings**: Click the **Gear Icon** to adjust volume or access settings.
 
 ---
 
 ## 🚀 Quick Start (Dev)
 
-1. **Install**: `pip install flask`
+1. **Install**: `pip install -r requirements.txt`
 2. **Run**: `python app.py`
 3. **Play**: `http://localhost:5000`
 
 ---
+
+## ✅ Current Features
+
+- **Core Loop**: Physics slingshot, spawning blunts, scoring.
+- **Visuals**: Particle effects, Screen shake, Procedural sprites.
+- **Audio**: Procedural Sound Effects (Web Audio API).
+- **Progression**: Combo system, Special Blunts (Gold/Armored), Difficulty scaling.
+- **Web3**: Wallet integration, on-chain leaderboard, tournament pot.
+- **Mobile Support**: Touch controls, screen rotation.
+
+---
+
 *Built for the Dogechain Community.*
