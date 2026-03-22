@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Deploy Leaderboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <script src="/static/js/config.js"></script>
+    <style>
+        body {
+            font-family: monospace;
+            background: #222;
+            color: #0f0;
+            padding: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background: #0f0;
+            color: #000;
+            border: none;
+            margin: 10px 0;
+        }
+
+        button:disabled {
+            background: #555;
+            cursor: not-allowed;
+        }
+
+        #log {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            border: 1px solid #444;
+            padding: 10px;
+            height: 300px;
+            overflow-y: scroll;
+            background: #000;
+        }
+
+        .error {
+            color: #f00;
+        }
+
+        .success {
+            color: #0f0;
+            font-weight: bold;
+        }
+
+        .warn {
+            color: #ff0;
+        }
+
+        #status {
+            margin-bottom: 10px;
+            padding: 10px;
+            border: 1px solid #555;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Deploy Leaderboard Contract (Secured)</h1>
+    <div id="status">Compiler Status: <span id="compilerState" style="color: #ff0">Initializing Worker...</span></div>
+
+    <p>1. Connect Wallet (Dogechain)</p>
+    <button id="connectBtn">Connect Wallet</button>
+    <div id="walletInfo"></div>
+
+    <p>2. Deploy Contract</p>
+    <button id="deployBtn" disabled>Deploy Contract</button>
+
+    <div id="log"></div>
+
+    <script>
+        let contractSource = '';
+
+        // Load contract source from the canonical file instead of embedding a copy
+        async function loadContractSource() {
+            try {
+                const res = await fetch('/api/contract-source');
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                contractSource = await res.text();
+                log('Contract source loaded from contracts/Leaderboard.sol', 'success');
+            } catch (e) {
+                log('Failed to load contract source: ' + e.message, 'error');
+            }
+        }
+
+        const logDiv = document.getElementById('log');
+        function log(msg, type = '') {
+            const line = document.createElement('div');
+            line.innerText = msg;
+            if (type) line.className = type;
+            logDiv.appendChild(line);
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        // Fetch contract source once log is available
+        loadContractSource();
+
+        // --- WORKER SCRIPT ---
+        // We embed the worker logic in a Blob to avoid separate file issues
+        const workerScript = `
+        self.importScripts('https://binaries.soliditylang.org/bin/soljson-v0.8.17+commit.8df45f5f.js');
+
+        let compileJSON;
+
+        // Wait for Module to init
+        var wrapper = function(soljson) {
+            if ('_solidity_compile' in soljson) {
+                return soljson.cwrap('solidity_compile', 'string', ['string', 'number']);
+            }
+        };
+
+        self.onmessage = function(e) {
+            const msg = e.data;
+            if (msg.command === 'load') {
+                if (self.Module) {
+                    try {
+                        compileJSON = self.Module.cwrap('solidity_compile', 'string', ['string', 'number']);
+                        self.postMessage({ type: 'loaded', success: true });
+                    } catch(err) {
+                        self.postMessage({ type: 'log', message: 'Worker Wrap Error: ' + err.message });
+                    }
+                } else {
+                    self.postMessage({ type: 'log', message: 'Module not found in worker' });
+                }
+            } else if (msg.command === 'compile') {
+                if (!compileJSON) {
+                     self.postMessage({ type: 'error', message: 'Compiler not loaded' });
+                     return;
+                }
+                try {
+                    const output = compileJSON(msg.input, 0);
+                    self.postMessage({ type: 'compiled', output: output });
+                } catch (e) {
+                    self.postMessage({ type: 'error', message: e.toString() });
+                }
+            }
+        };
+        `;
+
+        const blob = new Blob([workerScript], { type: 'application/javascript' });
+        const worker = new Worker(URL.createObjectURL(blob));
+
+        worker.onmessage = function (e) {
+            const data = e.data;
+            if (data.type === 'loaded') {
+                document.getElementById('compilerState').innerText = "Ready (Worker)";
+                document.getElementById('compilerState').style.color = "#0f0";
+                log("Compiler loaded in worker thread.", 'success');
+            } else if (data.type === 'log') {
+                log("[Worker] " + data.message);
+            } else if (data.type === 'error') {
+                log("[Worker Error] " + data.message, 'error');
+            } else if (data.type === 'compiled') {
+                handleCompilationResult(data.output);
+            }
+        };
+
+        // Trigger load
+        setTimeout(() => {
+            worker.postMessage({ command: 'load' });
+        }, 1000);
+
+
+        // --- WALLET LOGIC ---
+        let provider, signer;
+        const DOGECHAIN_ID = parseInt(GameConfig.DOGECHAIN_ID, 16);
+
+        document.getElementById('connectBtn').onclick = async () => {
+            if (!window.ethereum) { log('No wallet found! Install MetaMask.', 'error'); return; }
+            try {
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+
+                const network = await provider.getNetwork();
+                if (network.chainId !== DOGECHAIN_ID) {
+                    log('Wrong network! Switching to Dogechain...', 'warn');
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: GameConfig.DOGECHAIN_ID }],
+                        });
+                        provider = new ethers.providers.Web3Provider(window.ethereum); // re-init
+                    } catch (e) {
+                        try {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [GameConfig.DOGECHAIN_CONFIG]
+                            });
+                        } catch (addError) {
+                            log('Failed to switch/add network.', 'error');
+                            return;
+                        }
+                    }
+                }
+
+                signer = provider.getSigner();
+                const addr = await signer.getAddress();
+                document.getElementById('walletInfo').innerText = `Connected: ${addr}`;
+                log(`Wallet connected: ${addr}`, 'success');
+                document.getElementById('deployBtn').disabled = false;
+            } catch (err) {
+                log(`Connection Error: ${err.message}`, 'error');
+            }
+        };
+
+        // --- DEPLOY LOGIC ---
+        document.getElementById('deployBtn').onclick = async () => {
+            if (!signer) { log("Wallet not connected!", 'error'); return; }
+            log("Sending to worker for compilation...");
+
+            const input = JSON.stringify({
+                language: 'Solidity',
+                sources: { 'Leaderboard.sol': { content: contractSource } },
+                settings: { outputSelection: { '*': { '*': ['abi', 'evm.bytecode'] } } }
+            });
+
+            worker.postMessage({ command: 'compile', input: input });
+        };
+
+        async function handleCompilationResult(outputStr) {
+            try {
+                const output = JSON.parse(outputStr);
+
+                if (output.errors) {
+                    let hasErr = false;
+                    output.errors.forEach(e => {
+                        log(e.formattedMessage, e.severity === 'error' ? 'error' : 'warn');
+                        if (e.severity === 'error') hasErr = true;
+                    });
+                    if (hasErr) return;
+                }
+
+                const contractData = output.contracts['Leaderboard.sol']['Leaderboard'];
+                const abi = contractData.abi;
+                const bytecode = contractData.evm.bytecode.object;
+
+                log("Compilation successful! Deploying...", 'success');
+
+                const factory = new ethers.ContractFactory(abi, bytecode, signer);
+                const contract = await factory.deploy();
+
+                log(`Transaction sent: ${contract.deployTransaction.hash}`, 'warn');
+                log("Waiting for confirmation...");
+
+                await contract.deployed();
+
+                log("------------------------------------------------", 'success');
+                log(`CONTRACT DEPLOYED SUCCESSFULLY!`, 'success');
+                log(`ADDRESS: ${contract.address}`, 'success');
+                log("------------------------------------------------", 'success');
+                log("PLEASE COPY THE ADDRESS ABOVE AND UPDATE wallet.js", 'warn');
+            } catch (e) {
+                log("Error handling compilation result: " + e.message, 'error');
+            }
+        }
+    </script>
+</body>
+
+</html>

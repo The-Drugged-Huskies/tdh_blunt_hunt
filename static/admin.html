@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel - Blunt Hunt</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/5.7.2/ethers.umd.min.js"></script>
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #111;
+            color: #0f0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 50px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            text-shadow: 2px 2px #000;
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            background: #000;
+            color: #aaa;
+            border: 2px solid #555;
+            margin: 10px;
+            text-transform: uppercase;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        button:hover {
+            background: #222;
+            color: #fff;
+            border-color: #fff;
+        }
+
+
+        button:disabled {
+            border-color: #555;
+            color: #555;
+            cursor: not-allowed;
+        }
+
+        #status {
+            margin-top: 20px;
+            font-size: 1rem;
+            max-width: 600px;
+            text-align: center;
+            white-space: pre-wrap;
+        }
+
+        .error {
+            color: #f00;
+        }
+
+        .success {
+            color: #ff0;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>ADMIN DASHBOARD</h1>
+    <p>Target Contract: <input type="text" id="contractAddrInput" value=""
+            style="width: 350px; background: #000; color: #0f0; border: 1px solid #0f0; padding: 5px;"></p>
+
+    <button id="connectBtn">1. Connect Wallet</button>
+
+    <div style="margin: 10px; font-size: 0.9rem;">
+        <div>User Balance: <span id="walletBal" style="color:#fff;">-</span> DOGE</div>
+        <div>Contract Balance: <span id="contractBal" style="color:#fff;">-</span> DOGE</div>
+        <div id="ownerStatus" style="margin-top:5px; color: #ff0;"></div>
+    </div>
+
+    <hr style="width: 100%; border-color: #333;">
+
+    <!-- Game Cost Section -->
+    <div style="margin: 20px; border: 1px solid #333; padding: 20px;">
+        <h3>GAME CONFIG</h3>
+
+        <div style="margin-bottom: 20px;">
+            <h4>ENTRY PRICE (Current: <span id="curCost" style="color:#0f0">-</span> DOGE)</h4>
+            <input type="number" id="costInput" placeholder="1.0" step="0.1" style="padding: 5px;">
+            <button id="setCostBtn" disabled>SET PRICE (DOGE)</button>
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <h4>DEV FEE % (Current: <span id="curDevFee" style="color:#0f0">-</span>%)</h4>
+            <input type="number" id="devFeeInput" placeholder="25" min="0" max="100" style="padding: 5px;">
+            <button id="setDevFeeBtn" disabled>SET FEE (%)</button>
+        </div>
+
+        <div>
+            <h4>TOURNAMENT DURATION (Current: <span id="curDuration" style="color:#0f0">-</span>)</h4>
+            <button class="intervalBtn" data-val="3600">1 HOUR</button>
+            <button class="intervalBtn" data-val="86400">24 HOURS</button>
+            <button class="intervalBtn" data-val="604800">1 WEEK</button>
+            <button class="intervalBtn" data-val="2592000">30 DAYS</button>
+            <div style="margin-top: 10px; border-top: 1px dashed #333; padding-top: 10px;">
+                <input type="number" id="customIntervalInput" placeholder="Custom Seconds (e.g. 3600)"
+                    style="width: 200px; padding: 5px;">
+                <button id="setCustomIntervalBtn" disabled>SET CUSTOM DURATION</button>
+            </div>
+            <div style="margin-top: 10px; border-top: 1px dashed #333; padding-top: 10px;">
+                <label>Game Round Duration (Seconds):</label><br>
+                <input type="number" id="roundDurationInput" placeholder="e.g. 60" style="width: 200px; padding: 5px;">
+                <button id="setRoundDurationBtn" disabled>SET ROUND TIMER</button>
+                <br><span style="font-size:0.8rem; color:#888;">Current: <span id="curRoundDuration"
+                        style="color:#0f0">-</span>s</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Timer Section -->
+    <div style="margin: 20px; border: 1px solid #333; padding: 20px;">
+        <h3>TIMER CONTROLS (Next End: <span id="curEndTime" style="color:#0f0">-</span>)</h3>
+
+        <div style="margin-bottom: 20px;">
+            <h4>ALIGN TO SPECIFIC TIME (UTC)</h4>
+            <input type="time" id="wallClockInput" style="padding: 5px; font-size: 1.1rem;">
+            <button id="alignTimeBtn" disabled>SET NEXT END TIME</button>
+            <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">
+                Tip: Sets the match to end at this time <b>in UTC timezone</b>.
+            </div>
+        </div>
+
+        <h4>MANUAL OVERRIDE</h4>
+        <input type="text" id="timeInput" placeholder="Timestamp (e.g. 173...)" style="padding: 5px; width: 200px;">
+        <button id="setTimeBtn" disabled>SET MANUAL TIMESTAMP</button>
+        <br>
+        <button id="restartTimerBtn" disabled>SYNC TIMER (XX:42)</button>
+        <button id="forceResetBtn" disabled>END MATCH & PAYOUT</button>
+    </div>
+
+    <!-- Security Section -->
+    <div style="margin: 20px; border: 1px solid #333; padding: 20px;">
+        <h3>SECURITY (BACKEND)</h3>
+        <p>Current Signer: <span id="curSigner" style="color:yellow; font-family:monospace; font-size:0.9rem;">-</span>
+        </p>
+        <p>Link your backend Signer Wallet here to enable anti-cheat.</p>
+        <input type="text" id="signerInput" placeholder="Signer Address (0x...)" style="padding: 5px; width: 350px;">
+        <button id="setSignerBtn" disabled>SET SIGNER ADDRESS</button>
+    </div>
+
+    <!-- Withdraw Section -->
+    <div style="margin: 20px; border: 1px solid #333; padding: 20px;">
+        <h3>FUNDS</h3>
+        <button id="withdrawBtn" disabled>RECOVER ALL FUNDS</button>
+    </div>
+
+    <div id="status"></div>
+    <script src="/static/js/config.js"></script>
+
+    <script>
+        // Default, but user can change input
+        let CONTRACT_ADDRESS = GameConfig.LEADERBOARD_CONTRACT_ADDRESS;
+        document.getElementById('contractAddrInput').value = CONTRACT_ADDRESS;
+
+        const ABI = [
+            "function recoverFunds() external",
+            "function owner() view returns (address)",
+            "function setGameCost(uint256 _newCost) external",
+            "function setGameEndTime(uint256 _timestamp) external",
+            "function forceEndedState() external",
+            "function distributePrize() external",
+            "function setGameInterval(uint256 _interval) external",
+            "function setHelperAlignment(uint256 _offset) external",
+            "function setSignerAddress(address _signer) external",
+            "function gameCost() view returns (uint256)",
+            "function gameInterval() view returns (uint256)",
+            "function signerAddress() view returns (address)",
+            "function gameRoundDuration() view returns (uint256)",
+            "function setGameRoundDuration(uint256 _duration) external",
+            "function getPotInfo() view returns (uint256 pot, uint256 endTime)",
+            "function devFeePercent() view returns (uint256)",
+            "function setDevFeePercent(uint256 _percent) external"
+        ];
+
+        let provider, signer, contract;
+
+        function log(msg, type = '') {
+            const el = document.getElementById('status');
+            el.innerText = msg;
+            el.className = type;
+            // log message
+        }
+
+        async function updateBalances(addr) {
+            try {
+                // User Balance
+                const bal = await provider.getBalance(addr);
+                document.getElementById('walletBal').innerText = parseFloat(ethers.utils.formatEther(bal)).toFixed(4);
+
+                // Contract Balance
+                const cBal = await provider.getBalance(CONTRACT_ADDRESS);
+                document.getElementById('contractBal').innerText = parseFloat(ethers.utils.formatEther(cBal)).toFixed(4);
+            } catch (e) {
+                console.error("Balance Error:", e);
+            }
+        }
+
+        async function updateSettings() {
+            try {
+                // Cost
+                const cost = await contract.gameCost();
+                document.getElementById('curCost').innerText = ethers.utils.formatEther(cost);
+
+                // Dev Fee
+                try {
+                    const fee = await contract.devFeePercent();
+                    document.getElementById('curDevFee').innerText = fee.toString();
+                } catch (e) {
+                    console.warn("Dev fee fetch failed, fallback to 25. Error:", e.message);
+                    document.getElementById('curDevFee').innerText = "25 (Fixed)";
+                }
+
+                // Interval
+                const interval = await contract.gameInterval();
+                const seconds = interval.toNumber();
+                let label = seconds + "s";
+                if (seconds === 3600) label = "1 HOUR";
+                if (seconds === 86400) label = "24 HOURS";
+                if (seconds === 604800) label = "1 WEEK";
+                if (seconds === 2592000) label = "30 DAYS";
+                if (seconds === 2592000) label = "30 DAYS";
+                document.getElementById('curDuration').innerText = label;
+
+                // Round Duration
+                try {
+                    const dur = await contract.gameRoundDuration();
+                    document.getElementById('curRoundDuration').innerText = dur.toString();
+                } catch (e) {
+                    // fetch failed
+                }
+
+                // Signer
+                const signerAddr = await contract.signerAddress();
+                const sEl = document.getElementById('curSigner');
+                if (signerAddr === "0x0000000000000000000000000000000000000000") {
+                    sEl.innerText = "NOT SET (Unsecured)";
+                    sEl.style.color = "red";
+                } else {
+                    sEl.innerText = signerAddr;
+                    sEl.style.color = "#0f0";
+                }
+
+                // End Time
+                const potInfo = await contract.getPotInfo();
+                const endTs = potInfo.endTime.toNumber();
+                const date = new Date(endTs * 1000);
+                document.getElementById('curEndTime').innerText = date.toUTCString();
+
+            } catch (e) { console.error("Settings Error:", e); }
+        }
+
+        document.getElementById('connectBtn').addEventListener('click', async () => {
+            if (!window.ethereum) {
+                log("MetaMask not found!", "error");
+                return;
+            }
+            try {
+                CONTRACT_ADDRESS = document.getElementById('contractAddrInput').value;
+                provider = new ethers.providers.Web3Provider(window.ethereum);
+                await provider.send("eth_requestAccounts", []);
+                signer = provider.getSigner();
+                const addr = await signer.getAddress();
+
+                log("Connected: " + addr);
+                document.getElementById('connectBtn').innerText = "Connected: " + addr.substring(0, 6) + "...";
+
+                contract = new ethers.Contract(CONTRACT_ADDRESS, ABI, signer);
+
+                // Show Balances & Settings
+                await updateBalances(addr);
+                await updateSettings();
+
+                // Check owner
+                try {
+                    const ownerAddr = await contract.owner();
+                    const statusEl = document.getElementById('ownerStatus');
+                    if (ownerAddr.toLowerCase() !== addr.toLowerCase()) {
+                        statusEl.innerText = "WARNING: You are NOT the owner!";
+                        statusEl.style.color = "red";
+                    } else {
+                        statusEl.innerText = "VERIFIED OWNER";
+                        statusEl.style.color = "#0f0";
+
+                        // Enable all buttons
+                        document.querySelectorAll('button').forEach(b => b.disabled = false);
+                    }
+                } catch (e) {
+                    log("Could not verify owner: " + e.message, "error");
+                    document.querySelectorAll('button').forEach(b => b.disabled = false); // Allow try anyway
+                }
+
+            } catch (e) {
+                log("Connection Failed: " + e.message, "error");
+            }
+        });
+
+        // --- ACTIONS ---
+
+        // 1. Set Cost
+        document.getElementById('setCostBtn').addEventListener('click', async () => {
+            if (!contract) return;
+            try {
+                const val = document.getElementById('costInput').value;
+                if (!val) return alert("Enter cost in DOGE");
+                const wei = ethers.utils.parseEther(val);
+
+                log("Setting Cost to " + val + " DOGE...", "success");
+                const tx = await contract.setGameCost(wei);
+                await tx.wait();
+                log("Cost Updated!", "success");
+            } catch (e) { log("Error: " + e.message, "error"); }
+        });
+
+        // 1b. Set Dev Fee
+        document.getElementById('setDevFeeBtn').addEventListener('click', async () => {
+            if (!contract) return;
+            try {
+                const val = document.getElementById('devFeeInput').value;
+                if (!val) return alert("Enter percent (0-100)");
+
+                log("Setting Dev Fee to " + val + "%...", "success");
+                const tx = await contract.setDevFeePercent(val);
+                await tx.wait();
+                log("Dev Fee Updated!", "success");
+                updateSettings();
+            } catch (e) { log("Error: " + e.message, "error"); }
+        });
+
+        // 2. Set Time
+        document.getElementById('setTimeBtn').addEventListener('click', async () => {
+            if (!contract) return;
+            try {
+                const val = document.getElementById('timeInput').value;
+                if (!val) return alert("Enter timestamp");
+
+                log("Setting End Time...", "success");
+                const tx = await contract.setGameEndTime(val);
+                await tx.wait();
+                log("Time Updated!", "success");
+            } catch (e) { log("Error: " + e.message, "error"); }
+        });
+
+        // 2b. Restart Timer (Helper)
+        document.getElementById('restartTimerBtn').addEventListener('click', async () => {
+            if (!contract) return;
+            try {
+                // Calculate Next Teatime (XX:42) in JS
+                const now = Math.floor(Date.now() / 1000);
+                const currentSeconds = now % 3600;
+                const targetSeconds = 42 * 60;
+                let nextTeatime;
+
+                if (currentSeconds < targetSeconds) {
+                    nextTeatime = now + (targetSeconds - currentSeconds);
+                } else {
+                    nextTeatime = now + (3600 - currentSeconds) + targetSeconds;
+                }
+
+                // SMART SYNC: If less than 15 mins (900s) remaining, skip to NEXT hour
+                if (nextTeatime - now < 900) {
+                    nextTeatime += 3600;
+                }
+
+                const interval = await contract.gameInterval();
+                const offset = nextTeatime % interval.toNumber();
+
+                log(`Setting Timer to Next Teatime: ${nextTeatime} (in ${((nextTeatime - now) / 60).toFixed(1)} mins)...`, "success");
+
+                log(`Aligning Schedule (Offset: ${offset})...`, "warn");
+                const tx1 = await contract.setHelperAlignment(offset);
+                await tx1.wait();
+
+                const tx = await contract.setGameEndTime(nextTeatime);
+                await tx.wait();
+                log("Timer Synced & Aligned!", "success");
+            } catch (e) { log("Error: " + e.message, "error"); }
+        });
+
+        // 3. Force Reset
+        document.getElementById('forceResetBtn').addEventListener('click', async () => {
+            if (!contract) return;
+            if (!confirm("Are you sure? This will expire the timer AND trigger payout/restart.")) return;
+            try {
+                // Step 1: Expire Timer
+                log("1/2 Forcing Ended State...", "warn");
+                const tx1 = await contract.forceEndedState();
+                await tx1.wait();
+                log("Timer Expired! Triggering Payout...", "warn");
+
+                // Step 2: Trigger Payout & Restart
+                const tx2 = await contract.distributePrize();
+                await tx2.wait();
+
+                log("SUCCESS! Prize Distributed & Game Restarted.", "success");
+            } catch (e) { log("Error: " + e.message, "error"); }
+        });
+
+        // 4. Recover Funds
+        document.getElementById('withdrawBtn').addEventListener('click', async () => {
+            if (!contract) return;
+            try {
+                log("Recovering Funds...", "success");
+                const tx = await contract.recoverFunds();
+                await tx.wait();
+                log("Funds Recovered!", "success");
+                const addr = await signer.getAddress();
+                await updateBalances(addr);
+            } catch (e) { log("Error: " + e.message, "error"); }
+        });
+
+        // 5. Preset Intervals
+        document.querySelectorAll('.intervalBtn').forEach(btn => {
+            btn.addEventListener('click', async (e) => {
+                if (!contract) return;
+                const seconds = e.target.getAttribute('data-val');
+                const label = e.target.innerText;
+                try {
+                    log(`Setting Tournament Duration to ${label} (${seconds}s)...`, "success");
+                    const tx = await contract.setGameInterval(seconds);
+                    await tx.wait();
+                    log(`Duration Updated to ${label}! Effect takes place on NEXT reset.`, "success");
+                } catch (err) { log("Error: " + err.message, "error"); }
+            });
+        });
+
+        // 6. Custom Interval
+        document.getElementById('setCustomIntervalBtn').addEventListener('click', async () => {
+            if (!contract) return;
+            try {
+                const val = document.getElementById('customIntervalInput').value;
+                if (!val) return alert("Enter seconds");
+                const seconds = parseInt(val);
+
+                log(`Setting Custom Duration to ${seconds}s...`, "success");
+                const tx = await contract.setGameInterval(seconds);
+                await tx.wait();
+                log(`Custom Duration Updated!`, "success");
+            } catch (e) { log("Error: " + e.message, "error"); }
+        });
+
+        document.getElementById('setRoundDurationBtn').addEventListener('click', async () => {
+            if (!contract) return;
+            try {
+                const val = document.getElementById('roundDurationInput').value;
+                if (!val) return alert("Enter seconds");
+
+                log(`Setting Round Duration to ${val}s...`, "success");
+                const tx = await contract.setGameRoundDuration(val);
+                await tx.wait();
+                log("Round Duration Updated!", "success");
+                updateSettings();
+            } catch (e) { log("Error: " + e.message, "error"); }
+        });
+
+        // 7. Align Time (UTC)
+        document.getElementById('alignTimeBtn').addEventListener('click', async () => {
+            if (!contract) return;
+            try {
+                const timeStr = document.getElementById('wallClockInput').value; // "14:30"
+                if (!timeStr) return alert("Pick a time");
+
+                const [h, m] = timeStr.split(':').map(Number);
+
+                const now = new Date();
+                const target = new Date();
+                // Treat input as UTC
+                target.setUTCHours(h, m, 0, 0);
+
+                // If target is in past (or very close), move to tomorrow
+                // Tolerance: 60s
+                if (target.getTime() < now.getTime() + 60000) {
+                    target.setUTCDate(target.getUTCDate() + 1);
+                }
+
+                const timestamp = Math.floor(target.getTime() / 1000);
+
+                log(`Aligning Next End Time to: ${target.toUTCString()} (TS: ${timestamp})...`, "success");
+
+                // Calculate Alignment Offset
+                const interval = await contract.gameInterval();
+                const offset = timestamp % interval.toNumber();
+
+                log(`Updating Schedule Alignment (Offset: ${offset})...`, "warn");
+                const tx1 = await contract.setHelperAlignment(offset);
+                await tx1.wait();
+
+                const tx2 = await contract.setGameEndTime(timestamp);
+                await tx2.wait();
+                log("End Time & Schedule Aligned (UTC)!", "success");
+
+            } catch (e) { log("Error: " + e.message, "error"); }
+        });
+
+        // 8. Security: Set Signer
+        document.getElementById('setSignerBtn').addEventListener('click', async () => {
+            // Signer update clicked
+            if (!contract) {
+                console.error("Contract not initialized!");
+                return;
+            }
+            try {
+                const val = document.getElementById('signerInput').value;
+                if (!ethers.utils.isAddress(val)) return alert("Invalid Address");
+
+                log(`Setting Signer Address to ${val}...`, "success");
+                const tx = await contract.setSignerAddress(val);
+                // tx sent
+                await tx.wait();
+                log(`Signer Updated! The contract will now REJECT scores not signed by this address.`, "success");
+                updateSettings();
+            } catch (e) {
+                console.error("Set Signer Error:", e);
+                log("Error: " + e.message, "error");
+            }
+        });
+
+    </script>
+</body>
+
+</html>

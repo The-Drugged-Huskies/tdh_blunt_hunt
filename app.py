@@ -8,7 +8,8 @@ import json
 import os
 import time
 import jwt
-from flask import Flask, render_template, request, jsonify, send_from_directory
+from functools import wraps
+from flask import Flask, render_template, request, jsonify, send_from_directory, abort
 from web3 import Web3
 from eth_account import Account
 from eth_account.messages import encode_defunct
@@ -47,19 +48,34 @@ def index():
     return render_template('index.html')
 
 
+def require_admin(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        admin_secret = os.getenv('ADMIN_SECRET')
+        if not admin_secret:
+            abort(403)
+        if request.args.get('secret') != admin_secret and request.headers.get('X-Admin-Secret') != admin_secret:
+            abort(403)
+        return f(*args, **kwargs)
+    return decorated_function
+
+
 @app.route('/admin')
+@require_admin
 def admin():
     """Serves the admin panel for the contract owner."""
     return send_from_directory('static', 'admin.html')
 
 
 @app.route('/deploy')
+@require_admin
 def deploy():
     """Serves the contract deployment tool."""
     return send_from_directory('static', 'deploy.html')
 
 
 @app.route('/api/contract-source')
+@require_admin
 def contract_source():
     """Serves the Solidity contract source for the deploy tool."""
     return send_from_directory('contracts', 'Leaderboard.sol', mimetype='text/plain')
