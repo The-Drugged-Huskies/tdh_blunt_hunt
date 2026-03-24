@@ -454,7 +454,6 @@ class Game {
 
         this.blunts = [];
         this.husky = null;
-        this.husky = null;
 
 
 
@@ -467,16 +466,7 @@ class Game {
         // Timer Logic
         this.gameDuration = 60; // Fallback
 
-        // Async Fetch Config (if connected)
-        if (window.fetchGameConfig) {
-            window.fetchGameConfig().then(cfg => {
-                if (cfg && cfg.duration) {
-                    this.gameDuration = cfg.duration;
-                    // Force update timer display if waiting
-                    this.updateTimer(performance.now());
-                }
-            });
-        }
+        // Removed obsolete fetchGameConfig
 
         this.startTime = performance.now();
 

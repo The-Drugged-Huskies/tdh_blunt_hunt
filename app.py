@@ -27,12 +27,18 @@ app.config['SECRET_KEY'] = os.getenv('FLASK_SECRET_KEY', os.urandom(32).hex())
 ALLOWED_ORIGINS = os.getenv('ALLOWED_ORIGINS', 'http://localhost:5000,http://127.0.0.1:5000').split(',')
 CORS(app, resources={r"/api/*": {"origins": [o.strip() for o in ALLOWED_ORIGINS if o.strip()]}})
 
+def get_vercel_client_ip():
+    forwarded = request.headers.get('X-Forwarded-For')
+    if forwarded:
+        return forwarded.split(',')[0].strip()
+    return get_remote_address()
+
 # Rate Limiting
 limiter = Limiter(
-    get_remote_address,
+    get_vercel_client_ip,
     app=app,
     default_limits=["200 per day", "50 per hour"],
-    storage_uri="memory://",
+    storage_uri=os.getenv('REDIS_URL', 'memory://'),
 )
 
 # JWT Session Config

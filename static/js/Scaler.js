@@ -11,7 +11,6 @@ class Scaler {
 
         // Debounce resize
         this.resizeTimeout = null;
-        this.isStretch = false; // Deprecated
         this.isLandscape = false;
 
         if (this.target) {
