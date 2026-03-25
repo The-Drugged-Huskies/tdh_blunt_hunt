@@ -88,7 +88,7 @@ async function updateUI(account) {
 
         if (startConnectBtn) {
             startConnectBtn.classList.remove('hidden');
-            startConnectBtn.disabled = false;
+            startConnectBtn.disabled = true;
         }
         if (startBtn) {
             startBtn.classList.add('hidden');

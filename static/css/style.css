@@ -330,14 +330,8 @@ canvas {
     background: #555 !important;
     border-color: #777 !important;
     color: #aaa !important;
+    cursor: not-allowed !important;
 }
-
-.btn-connect-start:hover {
-    background: #666 !important;
-    color: #fff !important;
-    border-color: #fff !important;
-}
-
 
 /* Override overlay alignment for leaderboard */
 #leaderboard-screen {
