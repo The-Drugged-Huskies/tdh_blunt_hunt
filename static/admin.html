@@ -126,11 +126,11 @@
         <h3>TIMER CONTROLS (Next End: <span id="curEndTime" style="color:#0f0">-</span>)</h3>
 
         <div style="margin-bottom: 20px;">
-            <h4>ALIGN TO SPECIFIC TIME (UTC)</h4>
-            <input type="time" id="wallClockInput" style="padding: 5px; font-size: 1.1rem;">
-            <button id="alignTimeBtn" disabled>SET NEXT END TIME</button>
+            <h4>ALIGN & SET NEXT END TIME (UTC)</h4>
+            <input type="datetime-local" id="wallClockInput" style="padding: 5px; font-size: 1.1rem;">
+            <button id="alignTimeBtn" disabled>SET FIRST RESET & ALIGN</button>
             <div style="font-size: 0.8rem; color: #888; margin-top: 5px;">
-                Tip: Sets the match to end at this time <b>in UTC timezone</b>.
+                Tip: Sets the FIRST reset to this exact date/time (UTC). All future resets will space out from here using the Tournament Duration.
             </div>
         </div>
 
@@ -346,6 +346,7 @@
                 const tx = await contract.setGameEndTime(val);
                 await tx.wait();
                 log("Time Updated!", "success");
+                await updateSettings();
             } catch (e) { log("Error: " + e.message, "error"); }
         });
 
@@ -382,6 +383,7 @@
                 const tx = await contract.setGameEndTime(nextTeatime);
                 await tx.wait();
                 log("Timer Synced & Aligned!", "success");
+                await updateSettings();
             } catch (e) { log("Error: " + e.message, "error"); }
         });
 
@@ -401,6 +403,7 @@
                 await tx2.wait();
 
                 log("SUCCESS! Prize Distributed & Game Restarted.", "success");
+                await updateSettings();
             } catch (e) { log("Error: " + e.message, "error"); }
         });
 
@@ -417,6 +420,7 @@
                     const tx = await contract.setGameInterval(seconds);
                     await tx.wait();
                     log(`Duration Updated to ${label}! Effect takes place on NEXT reset.`, "success");
+                    await updateSettings();
                 } catch (err) { log("Error: " + err.message, "error"); }
             });
         });
@@ -433,6 +437,7 @@
                 const tx = await contract.setGameInterval(seconds);
                 await tx.wait();
                 log(`Custom Duration Updated!`, "success");
+                await updateSettings();
             } catch (e) { log("Error: " + e.message, "error"); }
         });
 
@@ -454,20 +459,17 @@
         document.getElementById('alignTimeBtn').addEventListener('click', async () => {
             if (!contract) return;
             try {
-                const timeStr = document.getElementById('wallClockInput').value; // "14:30"
-                if (!timeStr) return alert("Pick a time");
+                const timeStr = document.getElementById('wallClockInput').value; // "YYYY-MM-DDThh:mm"
+                if (!timeStr) return alert("Pick a date and time");
 
-                const [h, m] = timeStr.split(':').map(Number);
+                // Parse the local datetime string as UTC by appending 'Z'
+                const target = new Date(timeStr + ":00Z");
+                
+                if (isNaN(target.getTime())) return alert("Invalid date");
 
                 const now = new Date();
-                const target = new Date();
-                // Treat input as UTC
-                target.setUTCHours(h, m, 0, 0);
-
-                // If target is in past (or very close), move to tomorrow
-                // Tolerance: 60s
-                if (target.getTime() < now.getTime() + 60000) {
-                    target.setUTCDate(target.getUTCDate() + 1);
+                if (target.getTime() < now.getTime()) {
+                    if (!confirm("The selected time is in the past! Are you sure?")) return;
                 }
 
                 const timestamp = Math.floor(target.getTime() / 1000);
@@ -485,6 +487,7 @@
                 const tx2 = await contract.setGameEndTime(timestamp);
                 await tx2.wait();
                 log("End Time & Schedule Aligned (UTC)!", "success");
+                await updateSettings();
 
             } catch (e) { log("Error: " + e.message, "error"); }
         });
