@@ -149,11 +149,7 @@
         <button id="setSignerBtn" disabled>SET SIGNER ADDRESS</button>
     </div>
 
-    <!-- Withdraw Section -->
-    <div style="margin: 20px; border: 1px solid #333; padding: 20px;">
-        <h3>FUNDS</h3>
-        <button id="withdrawBtn" disabled>RECOVER ALL FUNDS</button>
-    </div>
+
 
     <div id="status"></div>
     <script src="/static/js/config.js"></script>
@@ -164,7 +160,7 @@
         document.getElementById('contractAddrInput').value = CONTRACT_ADDRESS;
 
         const ABI = [
-            "function recoverFunds() external",
+
             "function owner() view returns (address)",
             "function setGameCost(uint256 _newCost) external",
             "function setGameEndTime(uint256 _timestamp) external",
@@ -406,18 +402,7 @@
             } catch (e) { log("Error: " + e.message, "error"); }
         });
 
-        // 4. Recover Funds
-        document.getElementById('withdrawBtn').addEventListener('click', async () => {
-            if (!contract) return;
-            try {
-                log("Recovering Funds...", "success");
-                const tx = await contract.recoverFunds();
-                await tx.wait();
-                log("Funds Recovered!", "success");
-                const addr = await signer.getAddress();
-                await updateBalances(addr);
-            } catch (e) { log("Error: " + e.message, "error"); }
-        });
+
 
         // 5. Preset Intervals
         document.querySelectorAll('.intervalBtn').forEach(btn => {

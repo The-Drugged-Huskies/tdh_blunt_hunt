@@ -1,10 +1,12 @@
-# 👑 Admin Dashboard Manual v0.84
+# 👑 Admin Dashboard Manual v0.85
 
-Access the dashboard at: `http://localhost:5000/withdraw`
+Access the dashboard at: `http://localhost:5000/admin?secret=YOUR_ADMIN_SECRET`
+
+> **Note**: The `?secret=` value must match the `ADMIN_SECRET` in your `.env` file. Without it, you'll get a 403 error.
 
 ## 1. Quick Status Check
 
-When you connect your wallet, the dashboard now shows **Current Values** for all settings:
+When you connect your wallet, the dashboard shows **Current Values** for all settings:
 
 * **GREEN**: Everything is good (Owner verified, Security active).
 * **YELLOW**: Unsecured (Signer not set).
@@ -25,12 +27,19 @@ When you connect your wallet, the dashboard now shows **Current Values** for all
 * **How to change**: Enter seconds and click **SET ROUND TIMER**.
 * **Effect**: Updates the countdown timer for all players immediately (on next reload/game start).
 
+### 💸 Dev Fee %
+
+* **What**: Percentage of each entry fee sent to the owner wallet.
+* **Default**: `25%`.
+* **Max**: `50%` (capped in contract to prevent abuse).
+* **How to change**: Enter a percentage and click **SET FEE (%)**.
+
 ### ⏳ Tournament Duration
 
 * **What**: How long a "Match" lasts before the Prize Pot is distributed.
 * **Options**: 1 Hour, 24 Hours, 1 Week, 30 Days.
 * **Custom**: You can enter specific seconds (e.g. `300` for 5 minutes).
-* **Effect**: Changes take effect **after the tournament ends**.
+* **Effect**: Changes take effect **after the current tournament ends**.
 
 ### ⏱️ Timer Controls (Crucial)
 
@@ -45,26 +54,22 @@ When you connect your wallet, the dashboard now shows **Current Values** for all
 
 ### 🛡️ Security (Anti-Cheat)
 
-* **Signer Address**: This controls the backendverification logic.
+* **Signer Address**: This controls the backend verification logic.
   * **Status**:
     * **RED ("NOT SET")**: Contract is Open Mode (anyone can submit any score). Default after deployment.
     * **GREEN (Address)**: Contract is Secured (only backend can sign scores).
 * **How to Set**:
     1. Deploy your contract.
-    2. Go to `admin.html`.
-    3. Copy your **Backend Signer Address** (from your `.env` or `signer_debug.html`).
+    2. Go to the admin dashboard.
+    3. Derive the **Signer Public Address** from the `SIGNER_PRIVATE_KEY` in your `.env`.
     4. Paste it into the input field.
     5. Click **SET SIGNER ADDRESS**.
     6. **Verify**: The status text should turn GREEN.
-
-### 💸 Funds
-
-* **Recover Funds**: Pulls **100%** of the contract balance to your wallet.
-  * *Note: This includes the Prize Pot! Only use this for emergencies or migration.*
 
 ---
 
 ## 💡 Pro Tips
 
 * **Payouts are Automatic**: You do not need to click anything. When a player logs in after the time is up, the payout triggers automatically.
-* **Fees**: You (Owner) automatically get 25% of every entry sent to your wallet immediately when a player enters. You don't need to withdraw it manually.
+* **Fees**: You (Owner) automatically get your configured fee % of every entry sent to your wallet immediately when a player enters. You don't need to withdraw it manually.
+* **No Fund Recovery**: The contract does not have a `recoverFunds()` function. All funds flow through the normal prize distribution to prevent rug-pull concerns.

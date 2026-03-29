@@ -1,4 +1,4 @@
-# Blunt Hunt v0.84 - Developer User Guide
+# Blunt Hunt v0.85 - Developer User Guide
 
 This document contains internal development notes, deployment instructions, and maintenance details for **Blunt Hunt**.
 
@@ -68,7 +68,7 @@ The game features two distinct Leaderboards:
 
     ```bash
     python -m venv venv
-    .\venv\Scripts\activate
+    source venv/bin/activate
     pip install -r requirements.txt
     ```
 
@@ -111,18 +111,11 @@ You must tell the frontend where to find your new contract.
 
 **CRITICAL**: After deployment, your contract is unsecured.
 
-1. Open `static/admin.html`.
+1. Open `http://localhost:5000/admin?secret=YOUR_ADMIN_SECRET`.
 2. Connect Owner Wallet.
-3. Set your **Backend Signer Address** (from `signer_debug.html`).
+3. Set your **Backend Signer Address** (the public address matching your `SIGNER_PRIVATE_KEY` in `.env`).
 4. Click **SET SIGNER**.
 
-### 4. Admin: Fund Recovery (`admin.html`)
-
-The contract collects 25% of fees for the Dev and 75% for the Pot. The Pot pays out automatically, but if you need to recover funds manually:
-
-1. Open `static/admin.html` in your browser.
-2. Connect the **Owner Wallet** (the one that deployed the contract).
-3. Click **Recover Funds** to withdraw the entire contract balance to your wallet.
 
 ## 🕒 Tournament Schedule & Payout Mechanics
 

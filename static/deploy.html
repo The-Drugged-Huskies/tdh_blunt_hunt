@@ -79,7 +79,8 @@
         // Load contract source from the canonical file instead of embedding a copy
         async function loadContractSource() {
             try {
-                const res = await fetch('/api/contract-source');
+                const secret = new URLSearchParams(window.location.search).get('secret') || '';
+                const res = await fetch('/api/contract-source?secret=' + encodeURIComponent(secret));
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 contractSource = await res.text();
                 log('Contract source loaded from contracts/Leaderboard.sol', 'success');

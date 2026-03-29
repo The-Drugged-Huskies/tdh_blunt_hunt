@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.17;
 
 /**
  * @dev Provides information about the current execution context, including the
@@ -19,7 +19,10 @@ abstract contract Context {
     }
 }
 
-/**
+/**Warning: Source file does not specify required compiler version! Consider adding "pragma solidity ^0.8.17;"
+--> Leaderboard.sol
+
+Error handling compilation result: can't access property "Leaderboard.sol", output.contracts is undefined
  * @dev Contract module which provides a basic access control mechanism, where
  * there is an account (an owner) that can be granted exclusive access to
  * specific functions.
@@ -455,9 +458,17 @@ contract Leaderboard is Ownable {
         gameEndTime = block.timestamp; 
     }
 
-    function recoverFunds() external onlyOwner {
-        prizePool = 0; 
-        (bool success, ) = payable(owner()).call{value: address(this).balance}("");
-        require(success, "Transfer failed");
+    /**
+     * @dev Rejects direct DOGE transfers. All payments must go through startGame().
+     */
+    receive() external payable {
+        revert("Direct transfers not accepted. Use startGame().");
+    }
+
+    /**
+     * @dev Rejects calls to non-existent functions.
+     */
+    fallback() external payable {
+        revert("Function does not exist.");
     }
 }

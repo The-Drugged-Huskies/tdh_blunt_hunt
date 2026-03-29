@@ -1,8 +1,8 @@
 # TDH BLUNT HUNT - Project Roadmap & Improvements
 
 **Status**: 🟢 Operational (Deployed)
-**Version**: 0.82
-**Date**: 2026-03-20
+**Version**: 0.85
+**Date**: 2026-03-29
 
 ---
 
@@ -45,6 +45,12 @@
   - **Status**: FIXED (v0.70). `wallet.js` now pre-checks `hasTicket` before submitting to prevent `UNPREDICTABLE_GAS_LIMIT` crashes.
 - [x] **Environment Security**:
   - **Status**: FIXED. `verify_signer.py` and `test.html` no longer exist in the project.
+- [x] **recoverFunds Rug-Pull Vector (H-3)**:
+  - **Status**: FIXED (v0.85). `recoverFunds()` removed entirely. Funds flow only through `distributePrize()`.
+- [x] **Missing receive/fallback (M-10)**:
+  - **Status**: FIXED (v0.85). `receive()` and `fallback()` now revert with descriptive messages.
+- [x] **Security Audit Remediation**:
+  - **Status**: 27 of 28 issues resolved. Only L-5 (`audio.js` audit) remains.
 
 ---
 

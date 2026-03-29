@@ -4,10 +4,10 @@
  */
 const GameConfig = {
     // The deployed Leaderboard Contract Address
-    LEADERBOARD_CONTRACT_ADDRESS: "0xa6eAFd7C5d593F4d0dB8AcDe6fE683A5E6322dEd",
+    LEADERBOARD_CONTRACT_ADDRESS: "0xB153e6301e7dB96d6b83B399d3DE79761fBc8270",
 
     // Game Version
-    GAME_VERSION: "0.84",
+    GAME_VERSION: "0.85",
 
     // Chain Information
     DOGECHAIN_ID: '0x7D0', // 2000
